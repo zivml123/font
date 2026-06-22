@@ -67,7 +67,6 @@ export async function renderWorkout() {
   }
 
   updateWorkoutView(el);
-  bindWorkoutEvents(el);
 }
 
 function updateWorkoutView(el) {

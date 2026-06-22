@@ -108,7 +108,7 @@ window.__showAppError = showError;
 // ─── Service Worker ───────────────────────────────────────────────────────────
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(e => {
+    navigator.serviceWorker.register('./sw.js').catch(e => {
       console.warn('SW registration failed:', e.message);
     });
   }
