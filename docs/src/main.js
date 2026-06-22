@@ -85,6 +85,8 @@ async function switchTab(tab) {
     showError('Error cargando la sección: ' + e.message);
     console.error(e);
   }
+
+  loadTodayStats();
 }
 
 // ─── Error Banner ─────────────────────────────────────────────────────────────
@@ -136,6 +138,45 @@ export function refreshDashAvatar() {
   }
 }
 
+function loadTodayStats() {
+  try {
+    const today = dateStr(new Date());
+    const meals = JSON.parse(localStorage.getItem(`zivplan_meals_${today}`) || '[]');
+    const kcal = meals.reduce((s, m) => s + (m.kcal || 0), 0);
+    const prot = meals.reduce((s, m) => s + (m.protein || 0), 0);
+
+    const prog = JSON.parse(localStorage.getItem('zivplan_workout_progress') || '{}');
+    const doneCount = Object.values(prog).filter(v => v === 'done').length;
+    const failCount = Object.values(prog).filter(v => v === 'fail').length;
+
+    const kcalEl = document.getElementById('dash-kcal-val');
+    const protEl = document.getElementById('dash-prot-val');
+    const wrkEl  = document.getElementById('dash-workout-val');
+
+    if (kcalEl) kcalEl.textContent = kcal > 0 ? kcal.toLocaleString() : '0';
+    if (protEl) protEl.textContent = prot > 0 ? `${prot}g` : '—';
+    if (wrkEl) {
+      if (doneCount > 0) {
+        wrkEl.textContent = `${doneCount} ✓`;
+        wrkEl.className = 'dash-today-val done';
+      } else if (failCount > 0) {
+        wrkEl.textContent = `${failCount} ✗`;
+        wrkEl.className = 'dash-today-val fail';
+      } else {
+        wrkEl.textContent = '—';
+        wrkEl.className = 'dash-today-val';
+      }
+    }
+  } catch {}
+}
+
+function dateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function initDashHeader() {
   // Live date
   const now = new Date();
@@ -157,11 +198,17 @@ function initDashHeader() {
   // Avatar display
   refreshDashAvatar();
 
+  // Today stats
+  loadTodayStats();
+
   // Avatar click → go to profile tab to change photo
   document.getElementById('dash-avatar')?.addEventListener('click', () => {
     switchTab('profile');
   });
 }
+
+// Refresh today stats when a view saves data
+window.__refreshDashStats = loadTodayStats;
 
 // ─── Install Prompt (A2HS) ────────────────────────────────────────────────────
 function initInstallPrompt() {
