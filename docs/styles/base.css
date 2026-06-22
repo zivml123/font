@@ -158,12 +158,12 @@ body {
 /* ─── Tab Bar ────────────────────────────────────────────── */
 #tab-bar {
   position: sticky;
-  top: var(--safe-top);
+  top: 0;
   z-index: 100;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   display: flex;
-  height: var(--tab-h);
+  height: calc(var(--tab-h) + var(--safe-top));
   padding-top: var(--safe-top);
 }
 .tab-btn {

@@ -43,6 +43,25 @@ export async function renderProgress() {
   }
 }
 
+const RING_CIRC = 314.16; // 2π × 50
+
+function calcDailyTasks(mealRows, weightLog, prog) {
+  const todayDs = dateStr(new Date());
+  const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const mealToday = mealRows.some(r => r.date === todayDs && r.kcal > 0);
+  const weightRecent = weightLog.some(e => new Date(e.date + 'T00:00:00') >= oneWeekAgo);
+  const anyWorkout = Object.values(prog).some(v => v === 'done');
+
+  const tasks = [
+    { label: 'Comida registrada', icon: '🍽️', done: mealToday },
+    { label: 'Peso esta semana', icon: '⚖️', done: weightRecent },
+    { label: 'Entreno completado', icon: '🏋️', done: anyWorkout },
+  ];
+  const done = tasks.filter(t => t.done).length;
+  return { tasks, done, total: tasks.length, pct: Math.round((done / tasks.length) * 100) };
+}
+
 function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
   const ib = profile?.inbody_current || INBODY;
   const goals = profile?.objetivos || GOALS;
@@ -74,12 +93,41 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
   const prog = state.workoutProgress;
   const heatmapCells = buildHeatmap(numWeeks, prog);
 
+  // Daily tasks ring
+  const daily = calcDailyTasks(mealRows, weightLog, prog);
+
   // InBody comparison
   const prevIb = history.length ? history[history.length - 1] : null;
 
   el.innerHTML = `
+    <!-- Daily Progress Ring -->
+    <div class="daily-ring-section">
+      <div class="daily-ring-eyebrow">PROGRESO DE HOY</div>
+      <div class="daily-ring-layout">
+        <div class="daily-ring-wrap">
+          <svg class="daily-ring-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle class="daily-ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="daily-ring-fill" id="daily-ring-fill" cx="60" cy="60" r="50"
+              style="stroke-dashoffset:${RING_CIRC}"/>
+          </svg>
+          <div class="daily-ring-center">
+            <div class="daily-ring-pct">${daily.pct}%</div>
+            <div class="daily-ring-sub">${daily.done}/${daily.total} tareas</div>
+          </div>
+        </div>
+        <div class="daily-ring-checklist">
+          ${daily.tasks.map(t => `
+            <div class="daily-check-item${t.done ? ' done' : ''}">
+              <span class="daily-check-icon">${t.done ? '✓' : '○'}</span>
+              <span>${t.icon} ${t.label}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
     <!-- Summary Stats -->
-    <div class="summary-grid" style="margin-top:12px;">
+    <div class="summary-grid" style="margin-top:0;">
       <div class="summary-item">
         <span class="summary-val" style="color:var(--accent)">${avgKcal}</span>
         <div class="summary-lbl">Prom kcal/día</div>
@@ -203,8 +251,14 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
     </div>
   `;
 
-  // Draw charts
+  // Draw charts + animate ring
   requestAnimationFrame(() => {
+    const ringFill = document.getElementById('daily-ring-fill');
+    if (ringFill) {
+      setTimeout(() => {
+        ringFill.style.strokeDashoffset = RING_CIRC * (1 - daily.pct / 100);
+      }, 80);
+    }
     drawNutritionChart(days7, goals);
     if (weightLog.length) drawWeightChart(weightLog, goals.peso_meta_kg);
     bindProgressEvents(el, weightLog);
