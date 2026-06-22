@@ -1,5 +1,5 @@
 // Service Worker for GitHub Pages static version
-const CACHE = 'zivplan-static-v3';
+const CACHE = 'zivplan-static-v4';
 const STATIC = [
   './',
   './index.html',
