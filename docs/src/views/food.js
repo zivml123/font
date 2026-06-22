@@ -109,7 +109,7 @@ function renderFoodShell(el, profile) {
       </div>
 
       <!-- Hidden file input for camera -->
-      <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden">
+      <input type="file" id="photo-input" accept="image/*" class="hidden">
 
       <!-- Meals list -->
       <div class="section-row">
@@ -322,12 +322,13 @@ async function handleAnalyzeAndAdd(el, resultData) {
 function bindFoodEvents(el) {
   // Sub-tab switching
   el.querySelectorAll('.sub-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', async () => {
       const which = tab.dataset.subtab;
       set('foodSubTab', which);
       el.querySelectorAll('.sub-tab').forEach(t => t.classList.toggle('active', t.dataset.subtab === which));
       el.querySelector('#food-log-view').classList.toggle('hidden', which !== 'log');
       el.querySelector('#food-menu-view').classList.toggle('hidden', which !== 'menu');
+      if (which === 'log') await loadAndRenderLog(el);
     });
   });
 

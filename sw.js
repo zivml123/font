@@ -1,4 +1,4 @@
-const CACHE = 'zivplan-v1';
+const CACHE = 'zivplan-v3';
 const STATIC = [
   '/',
   '/index.html',
@@ -20,6 +20,9 @@ const STATIC = [
   '/src/views/progress.js',
   '/src/views/profile.js',
   '/assets/icon.svg',
+  '/assets/icon-192.png',
+  '/assets/icon-512.png',
+  '/assets/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', e => {

@@ -1,5 +1,5 @@
 // Service Worker for GitHub Pages static version
-const CACHE = 'zivplan-static-v1';
+const CACHE = 'zivplan-static-v3';
 const STATIC = [
   './',
   './index.html',
@@ -21,6 +21,9 @@ const STATIC = [
   './src/views/progress.js',
   './src/views/profile.js',
   './assets/icon.svg',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', e => {
@@ -44,7 +47,12 @@ self.addEventListener('fetch', e => {
     e.respondWith(fetch(e.request));
     return;
   }
-  // Cache-first for everything else
+  // Network-only for external CDN resources (fonts, chart.js)
+  if (url.hostname !== self.location.hostname) {
+    e.respondWith(fetch(e.request).catch(() => new Response('', { status: 503 })));
+    return;
+  }
+  // Cache-first for same-origin assets
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
