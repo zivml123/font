@@ -288,6 +288,7 @@ async function handleAnalyzeAndAdd(el, resultData) {
           </div>
         </div>
       </div>
+      ${resultData.explanation ? `<p style="font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5;">🤖 ${escHtml(resultData.explanation)}</p>` : ''}
     `,
     actions: [
       { id: 'cancel', label: 'Cancelar', class: 'btn-secondary', onClick: closeModal },

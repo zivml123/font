@@ -52,19 +52,24 @@ const KOSHER_SUFFIX = `Si la comida contiene mezcla de carne con lácteos, cerdo
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// Health check — lets the frontend verify the backend is reachable
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, ai: !!process.env.ANTHROPIC_API_KEY });
+});
+
 // Analyze food from text description
 app.post('/api/analyze-meal', apiLimiter, async (req, res) => {
   const { text } = req.body;
   if (!text?.trim()) return res.status(400).json({ error: 'Texto requerido.' });
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'API key no configurada.' });
+  if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'ANTHROPIC_API_KEY no configurada en el servidor.' });
 
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 300,
+      max_tokens: 400,
       messages: [{
         role: 'user',
-        content: `Eres un nutricionista experto. Analiza esta comida y estima sus calorías y macronutrientes de forma realista, usando porciones típicas si no se especifican gramos exactos.\nComida: "${text}"\n${KOSHER_SUFFIX}\nResponde ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni backticks:\n{"item":"descripción corta en español (max 6 palabras)","kcal":número_entero,"protein":número_entero,"carbs":número_entero,"fat":número_entero}`
+        content: `Eres un nutricionista experto. Analiza esta comida y estima sus calorías y macronutrientes de forma realista, usando porciones típicas si no se especifican gramos exactos.\nComida: "${text}"\n${KOSHER_SUFFIX}\nResponde ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni backticks:\n{"item":"descripción corta en español (max 6 palabras)","kcal":número_entero,"protein":número_entero,"carbs":número_entero,"fat":número_entero,"explanation":"1 frase corta explicando la estimación"}`
       }]
     });
     const raw = msg.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
@@ -80,17 +85,17 @@ app.post('/api/analyze-meal', apiLimiter, async (req, res) => {
 app.post('/api/analyze-photo', apiLimiter, async (req, res) => {
   const { imageBase64, mediaType } = req.body;
   if (!imageBase64) return res.status(400).json({ error: 'Imagen requerida.' });
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'API key no configurada.' });
+  if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'ANTHROPIC_API_KEY no configurada en el servidor.' });
 
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 300,
+      max_tokens: 400,
       messages: [{
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: mediaType || 'image/jpeg', data: imageBase64 } },
-          { type: 'text', text: `Eres un nutricionista experto. Mira esta foto y estima las calorías y macronutrientes de la comida que ves, según las porciones visibles en la imagen.\n${KOSHER_SUFFIX}\nResponde ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni backticks:\n{"item":"descripción corta en español (max 6 palabras)","kcal":número_entero,"protein":número_entero,"carbs":número_entero,"fat":número_entero}` }
+          { type: 'text', text: `Eres un nutricionista experto. Mira esta foto y estima las calorías y macronutrientes de la comida que ves, según las porciones visibles en la imagen.\n${KOSHER_SUFFIX}\nResponde ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni backticks:\n{"item":"descripción corta en español (max 6 palabras)","kcal":número_entero,"protein":número_entero,"carbs":número_entero,"fat":número_entero,"explanation":"1 frase corta explicando la estimación"}` }
         ]
       }]
     });

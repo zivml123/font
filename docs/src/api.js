@@ -1,35 +1,29 @@
-// Browser-direct Anthropic API for static/GitHub Pages preview.
-// API key entered once in Profile → saved in localStorage.
-// For production, use the Express backend instead (keeps key server-side).
+// Backend proxy for AI food analysis.
+// User enters their backend URL in Profile → IA (e.g. https://my-app.onrender.com).
+// The backend holds the ANTHROPIC_API_KEY; no key is ever stored in the browser.
 
-const KOSHER = `Si la comida contiene mezcla de carne con lácteos, cerdo, mariscos o cualquier ingrediente no kosher, agrega el campo "warning": "No kosher: [razón]". Si es completamente kosher, omite el campo warning.`;
+const LS_KEY = 'zivplan_backend_url';
 
-export function getApiKey() {
-  return localStorage.getItem('zivplan_anthropic_key') || '';
+export function getBackendUrl() {
+  return (localStorage.getItem(LS_KEY) || '').replace(/\/$/, '');
 }
-export function setApiKey(k) {
-  localStorage.setItem('zivplan_anthropic_key', k);
+export function setBackendUrl(url) {
+  localStorage.setItem(LS_KEY, url.trim().replace(/\/$/, ''));
 }
 
-async function callAnthropic(messages) {
-  const key = getApiKey();
-  if (!key) throw new Error('API key no configurada. Agrégala en Perfil → IA para análisis de comida.');
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+async function callBackend(endpoint, body) {
+  const base = getBackendUrl();
+  if (!base) throw new Error('Backend URL no configurada. Ve a Perfil → IA para configurarla.');
+  const resp = await fetch(`${base}${endpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, messages }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Error ${resp.status}`);
+    throw new Error(err.error || `Error ${resp.status}`);
   }
-  const data = await resp.json();
-  return data.content.map(b => b.text || '').join('');
+  return resp.json();
 }
 
 function sanitizeResult(r) {
@@ -40,22 +34,22 @@ function sanitizeResult(r) {
     carbs: Math.max(0, Math.round(Number(r.carbs) || 0)),
     fat: Math.max(0, Math.round(Number(r.fat) || 0)),
     warning: r.warning ? String(r.warning) : null,
+    explanation: r.explanation ? String(r.explanation) : null,
   };
 }
 
 export async function analyzeText(text) {
-  const raw = await callAnthropic([{ role: 'user', content:
-    `Eres un nutricionista experto. Analiza esta comida y estima calorías y macronutrientes.\nComida: "${text}"\n${KOSHER}\nResponde ÚNICAMENTE con JSON válido sin backticks:\n{"item":"descripción (max 6 palabras)","kcal":0,"protein":0,"carbs":0,"fat":0}` }]);
-  return sanitizeResult(JSON.parse(raw.replace(/```json|```/g, '').trim()));
+  const result = await callBackend('/api/analyze-meal', { text });
+  return sanitizeResult(result);
 }
 
 export async function analyzePhoto(file) {
   const base64 = await fileToBase64(file);
-  const raw = await callAnthropic([{ role: 'user', content: [
-    { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
-    { type: 'text', text: `Eres un nutricionista experto. Estima calorías y macros de esta foto.\n${KOSHER}\nResponde ÚNICAMENTE con JSON válido sin backticks:\n{"item":"descripción (max 6 palabras)","kcal":0,"protein":0,"carbs":0,"fat":0}` }
-  ]}]);
-  return sanitizeResult(JSON.parse(raw.replace(/```json|```/g, '').trim()));
+  const result = await callBackend('/api/analyze-photo', {
+    imageBase64: base64,
+    mediaType: file.type || 'image/jpeg',
+  });
+  return sanitizeResult(result);
 }
 
 function fileToBase64(file) {

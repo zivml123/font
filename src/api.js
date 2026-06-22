@@ -38,6 +38,7 @@ function sanitizeResult(r) {
     carbs: Math.max(0, Math.round(Number(r.carbs) || 0)),
     fat: Math.max(0, Math.round(Number(r.fat) || 0)),
     warning: r.warning ? String(r.warning) : null,
+    explanation: r.explanation ? String(r.explanation) : null,
   };
 }
 

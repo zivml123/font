@@ -3,7 +3,7 @@ import { getProfile, updateProfile, addInBodyEntry } from '../storage.js';
 import { INBODY, GOALS } from '../mealData.js';
 import { toastSaved, toastError, toastInfo } from '../components/toast.js';
 import { openModal, closeModal } from '../components/modal.js';
-import { getApiKey, setApiKey } from '../api.js';
+import { getBackendUrl, setBackendUrl } from '../api.js';
 
 export async function renderProfile() {
   const el = document.getElementById('profile-view');
@@ -90,15 +90,24 @@ export async function renderProfile() {
       </div>
       ` : ''}
 
-      <!-- IA config (static preview) -->
+      <!-- IA config -->
       <div class="profile-section">
         <div class="profile-section-title">Análisis de comida con IA</div>
-        <div class="settings-row">
-          <span class="settings-label" style="font-size:12px;color:var(--muted);">Anthropic API Key para análisis de comida por texto/foto.</span>
-        </div>
-        <div style="padding:8px 16px 14px;">
-          <input class="auth-input" type="password" id="field-apikey" placeholder="sk-ant-..." value="${escAttr(getApiKey())}" autocomplete="off">
-          <button class="btn btn-secondary btn-full" id="btn-save-apikey" style="margin-top:10px;">Guardar API key</button>
+        <div style="padding:8px 16px 4px;">
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 10px;">
+            Ingresa la URL de tu backend para activar el análisis de comidas por texto y foto.<br>
+            El backend guarda tu API key de forma segura — nunca se almacena en el navegador.
+          </p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 10px;">
+            <strong style="color:var(--text)">Cómo desplegar gratis:</strong><br>
+            1. Crea una cuenta en <strong style="color:var(--text)">render.com</strong><br>
+            2. New → Web Service → conecta este repositorio<br>
+            3. Build: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">npm install</code>  Start: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">node server.js</code><br>
+            4. En Environment Variables agrega: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">ANTHROPIC_API_KEY=sk-ant-...</code><br>
+            5. Copia la URL pública de Render (ej: https://mi-app.onrender.com) y pégala abajo.
+          </p>
+          <input class="auth-input" type="url" id="field-backend-url" placeholder="https://mi-app.onrender.com" value="${escAttr(getBackendUrl())}" autocomplete="off">
+          <button class="btn btn-secondary btn-full" id="btn-save-backend-url" style="margin-top:10px;">Guardar URL del backend</button>
         </div>
       </div>
 
@@ -152,13 +161,14 @@ export async function renderProfile() {
 }
 
 function bindProfileEvents(el) {
-  // Save API key
-  el.querySelector('#btn-save-apikey')?.addEventListener('click', () => {
-    const k = el.querySelector('#field-apikey')?.value.trim();
-    if (!k) { toastInfo('Ingresa tu API key de Anthropic.'); return; }
-    setApiKey(k);
+  // Save backend URL
+  el.querySelector('#btn-save-backend-url')?.addEventListener('click', () => {
+    const url = el.querySelector('#field-backend-url')?.value.trim();
+    if (!url) { toastInfo('Ingresa la URL de tu backend.'); return; }
+    if (!url.startsWith('http')) { toastInfo('La URL debe empezar con https://'); return; }
+    setBackendUrl(url);
     toastSaved();
-    toastInfo('API key guardada. Ya puedes analizar comidas.');
+    toastInfo('Backend URL guardada. Ya puedes analizar comidas.');
   });
 
   // Save profile
