@@ -1,16 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#121212"/>
-  <rect x="48" y="48" width="416" height="416" rx="60" fill="#1B1B1B"/>
-  <!-- Dumbbell icon -->
-  <rect x="208" y="160" width="96" height="192" rx="16" fill="#FF4D1C"/>
-  <!-- Left weight -->
-  <rect x="100" y="196" width="108" height="120" rx="20" fill="#FF4D1C"/>
-  <rect x="72" y="218" width="44" height="76" rx="14" fill="#E03818"/>
-  <!-- Right weight -->
-  <rect x="304" y="196" width="108" height="120" rx="20" fill="#FF4D1C"/>
-  <rect x="396" y="218" width="44" height="76" rx="14" fill="#E03818"/>
-  <!-- Z letter -->
-  <text x="256" y="295" text-anchor="middle" dominant-baseline="middle"
-    font-family="Arial Black, Arial" font-weight="900" font-size="80"
-    fill="white" letter-spacing="-2">Z</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E0C06"/>
+      <stop offset="100%" stop-color="#121212"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Top accent stripe -->
+  <rect width="512" height="14" fill="#FF4D1C"/>
+  <!-- Z letterform (top bar + diagonal + bottom bar merged) -->
+  <!-- Top horizontal bar -->
+  <rect x="72" y="88" width="368" height="80" rx="6" fill="#FF4D1C"/>
+  <!-- Diagonal band: parallelogram -->
+  <polygon points="300,168 440,168 212,344 72,344" fill="#FF4D1C"/>
+  <!-- Bottom horizontal bar -->
+  <rect x="72" y="344" width="368" height="80" rx="6" fill="#FF4D1C"/>
+  <!-- Accent dot -->
+  <circle cx="436" cy="436" r="18" fill="#ECECEC" opacity="0.5"/>
 </svg>

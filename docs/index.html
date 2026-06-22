@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#121212">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ziv Plan">
+  <meta name="apple-mobile-web-app-title" content="Ziv Plan Fitness">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="Tu plan de fitness personal — Ziv Mendelson">
 
@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/views.css">
 
-  <title>Ziv Plan — Fitness Personal</title>
+  <title>Ziv Plan Fitness</title>
 
   <script>
     // No Supabase on static preview — uses localStorage
@@ -38,7 +38,7 @@
 <body>
 
 <div id="loading-screen">
-  <div class="loading-logo">ZIV PLAN</div>
+  <div class="loading-logo">ZIV PLAN FITNESS</div>
   <div class="loading-spinner"></div>
 </div>
 
@@ -69,25 +69,25 @@
 
   <main id="app">
 
-    <div class="hero">
-      <img class="hero-img" src="assets/cover.jpg" alt="" onerror="this.style.display='none'">
-      <div class="hero-gradient"></div>
-      <div class="hero-no-img">
-        <div class="hero-no-img-text">
-          ZIV — TU MEJOR VERSIÓN<br>
-          "MAÑANA EMPIEZO EL PLAN"<br>
-          HOY ES DÍA DE CARGA<br>
-          SIN CULPA (mentira)<br>
-          CARGANDO DISCIPLINA...
+    <div class="dash-header">
+      <div class="dash-deco" aria-hidden="true"></div>
+      <div class="dash-inner">
+        <div class="dash-row">
+          <div class="dash-brand">
+            <div class="dash-brand-eyebrow">PLAN DE FITNESS</div>
+            <div class="dash-brand-name" id="dash-name">ZIV MENDELSON</div>
+            <div class="dash-brand-date" id="dash-date">—</div>
+          </div>
+          <button class="dash-avatar" id="dash-avatar" aria-label="Foto de perfil" title="Cambiar foto">
+            <img id="dash-avatar-img" class="dash-avatar-img hidden" src="" alt="avatar">
+            <span id="dash-avatar-initials" class="dash-avatar-initials">ZM</span>
+            <div class="dash-avatar-badge">+</div>
+          </button>
         </div>
-      </div>
-      <div class="hero-content">
-        <p class="hero-eyebrow">ZIV MENDELSON · 21 años</p>
-        <h1 class="hero-title">Plan Fitness</h1>
-        <div class="hero-sub">
-          <span>79.8 → 74.8 kg</span>
-          <span>18.7% → 15% grasa</span>
-          <span>175g proteína/día</span>
+        <div class="dash-pills" id="dash-pills">
+          <span class="dash-pill" id="dash-pill-weight">79.8 → 74.8 kg</span>
+          <span class="dash-pill accent" id="dash-pill-fat">18.7% → 15%</span>
+          <span class="dash-pill" id="dash-pill-prot">175g prot/día</span>
         </div>
       </div>
     </div>

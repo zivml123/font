@@ -79,7 +79,75 @@
   gap: 16px;
   margin-bottom: 24px;
 }
-.profile-header-info {}
+.profile-header-info { flex: 1; min-width: 0; }
+/* Avatar upload widget */
+.profile-avatar-upload {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+.profile-avatar-letters {
+  font-family: 'Oswald', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  pointer-events: none;
+  user-select: none;
+}
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.profile-avatar-upload:hover .profile-avatar-overlay,
+.profile-avatar-upload:active .profile-avatar-overlay { opacity: 1; }
+.profile-avatar-edit-icon { font-size: 20px; }
+.profile-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+.profile-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.btn-text-sm {
+  background: none;
+  border: none;
+  color: var(--fail);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 4px;
+  text-decoration: underline;
+}
 .profile-section {
   background: var(--panel);
   border: 1px solid var(--line);

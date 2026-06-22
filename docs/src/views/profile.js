@@ -22,15 +22,24 @@ export async function renderProfile() {
   const initials = nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   const supabase = window.__supabase;
 
+  const avatarDataUrl = localStorage.getItem('zivplan_avatar') || '';
   el.innerHTML = `
     <div class="profile-view">
-      <!-- Header -->
+      <!-- Header with photo upload -->
       <div class="profile-header">
-        <div class="profile-avatar">${initials}</div>
+        <div class="profile-avatar-upload" id="profile-avatar-upload" title="Cambiar foto de perfil">
+          <img id="profile-avatar-photo" class="profile-avatar-photo ${avatarDataUrl ? '' : 'hidden'}" src="${escAttr(avatarDataUrl)}" alt="foto">
+          <span id="profile-avatar-letters" class="profile-avatar-letters ${avatarDataUrl ? 'hidden' : ''}">${initials}</span>
+          <div class="profile-avatar-overlay">
+            <span class="profile-avatar-edit-icon">📷</span>
+          </div>
+          <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+        </div>
         <div class="profile-header-info">
           <div class="profile-name">${escHtml(nombre)}</div>
           <div class="profile-meta">21 años · 171.9 cm · Kosher</div>
           ${state.user ? `<div class="profile-meta" style="margin-top:4px;font-size:11px;">${escHtml(state.user.email)}</div>` : '<div class="profile-meta" style="margin-top:4px;font-size:11px;color:var(--muted);">Modo local · sin cuenta</div>'}
+          <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Eliminar foto</button>
         </div>
       </div>
 
@@ -161,6 +170,44 @@ export async function renderProfile() {
 }
 
 function bindProfileEvents(el) {
+  // Profile photo upload
+  const avatarUpload = el.querySelector('#profile-avatar-upload');
+  const avatarFileInput = el.querySelector('#avatar-file-input');
+  avatarUpload?.addEventListener('click', e => {
+    if (e.target === avatarFileInput) return;
+    avatarFileInput?.click();
+  });
+  avatarFileInput?.addEventListener('change', async () => {
+    const file = avatarFileInput.files[0];
+    if (!file) return;
+    try {
+      const dataUrl = await compressAvatar(file, 256);
+      localStorage.setItem('zivplan_avatar', dataUrl);
+      const photo = el.querySelector('#profile-avatar-photo');
+      const letters = el.querySelector('#profile-avatar-letters');
+      const removeBtn = el.querySelector('#btn-remove-photo');
+      if (photo) { photo.src = dataUrl; photo.classList.remove('hidden'); }
+      if (letters) letters.classList.add('hidden');
+      if (removeBtn) removeBtn.style.display = '';
+      syncDashAvatar(dataUrl);
+      toastSaved();
+    } catch (e) {
+      toastError('No se pudo guardar la foto: ' + e.message);
+    }
+    avatarFileInput.value = '';
+  });
+  el.querySelector('#btn-remove-photo')?.addEventListener('click', () => {
+    localStorage.removeItem('zivplan_avatar');
+    const photo = el.querySelector('#profile-avatar-photo');
+    const letters = el.querySelector('#profile-avatar-letters');
+    const removeBtn = el.querySelector('#btn-remove-photo');
+    if (photo) { photo.src = ''; photo.classList.add('hidden'); }
+    if (letters) letters.classList.remove('hidden');
+    if (removeBtn) removeBtn.style.display = 'none';
+    syncDashAvatar(null);
+    toastInfo('Foto eliminada.');
+  });
+
   // Save backend URL
   el.querySelector('#btn-save-backend-url')?.addEventListener('click', () => {
     const url = el.querySelector('#field-backend-url')?.value.trim();
@@ -273,3 +320,39 @@ function bindProfileEvents(el) {
 
 function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function compressAvatar(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const size = Math.min(img.width, img.height, maxSize);
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const sx = (img.width  - Math.min(img.width, img.height)) / 2;
+        const sy = (img.height - Math.min(img.width, img.height)) / 2;
+        const sw = Math.min(img.width, img.height);
+        ctx.drawImage(img, sx, sy, sw, sw, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function syncDashAvatar(dataUrl) {
+  const img      = document.getElementById('dash-avatar-img');
+  const initials = document.getElementById('dash-avatar-initials');
+  if (dataUrl) {
+    if (img) { img.src = dataUrl; img.classList.remove('hidden'); }
+    if (initials) initials.classList.add('hidden');
+  } else {
+    if (img) { img.src = ''; img.classList.add('hidden'); }
+    if (initials) initials.classList.remove('hidden');
+  }
+}

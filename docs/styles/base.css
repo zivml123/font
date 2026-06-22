@@ -138,82 +138,132 @@ body {
 .view.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* ─── Hero Banner ────────────────────────────────────────── */
-.hero {
+/* ─── Dashboard Header ───────────────────────────────────── */
+.dash-header {
   position: relative;
-  width: 100%;
-  min-height: 200px;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a0a05 0%, #2d1208 50%, #121212 100%);
+  background: linear-gradient(135deg, #1E0C06 0%, #2A1008 50%, #1A1A1A 100%);
+  border-bottom: 1px solid var(--line);
+  padding: 20px 20px 18px;
 }
-.hero-img {
-  width: 100%;
-  max-height: 230px;
-  object-fit: cover;
-  object-position: center 18%;
-  display: block;
-}
-.hero-gradient {
+.dash-deco {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, var(--bg) 0%, var(--bg) 10%, transparent 70%);
+  top: -40px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(255,77,28,0.10);
+  border-radius: 50%;
+  pointer-events: none;
 }
-.hero-content {
+.dash-deco::after {
+  content: '';
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+  top: 24px; left: 24px; right: 24px; bottom: 24px;
+  border: 1px solid rgba(255,77,28,0.06);
+  border-radius: 50%;
 }
-.hero-eyebrow {
-  font-family: 'Oswald', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-.hero-title {
-  font-family: 'Oswald', sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--text);
-}
-.hero-sub {
-  display: flex;
-  gap: 12px;
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
-.hero-sub span {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 3px 10px;
-}
-
-/* No-cover fallback pattern */
-.hero-no-img {
-  position: absolute;
-  inset: 0;
+.dash-inner { position: relative; z-index: 1; }
+.dash-row {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-end;
-  padding: 24px 20px 0;
-  pointer-events: none;
-  overflow: hidden;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
 }
-.hero-no-img-text {
+.dash-brand-eyebrow {
   font-family: 'Oswald', sans-serif;
-  font-size: 11px;
-  color: rgba(255,77,28,0.25);
-  text-align: right;
-  line-height: 2.2;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.dash-brand-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+}
+.dash-brand-date {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+  font-weight: 500;
+}
+/* Avatar button */
+.dash-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--accent-dim);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s, transform 0.15s;
+  padding: 0;
+}
+.dash-avatar:active { transform: scale(0.95); }
+.dash-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.dash-avatar-initials {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  pointer-events: none;
+}
+.dash-avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+/* Stats pills row */
+.dash-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.dash-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.dash-pill.accent {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ─── Section Headers ────────────────────────────────────── */

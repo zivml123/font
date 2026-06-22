@@ -19,6 +19,7 @@ async function init() {
   initErrorBanner();
   registerServiceWorker();
   initInstallPrompt();
+  initDashHeader();
   hideLoading();
 
   // Render initial view
@@ -112,6 +113,43 @@ function registerServiceWorker() {
       console.warn('SW registration failed:', e.message);
     });
   }
+}
+
+// ─── Dashboard Header ─────────────────────────────────────────────────────────
+const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DAYS_ES   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+export function refreshDashAvatar() {
+  const avatarBtn = document.getElementById('dash-avatar');
+  if (!avatarBtn) return;
+  const stored = localStorage.getItem('zivplan_avatar');
+  const img = document.getElementById('dash-avatar-img');
+  const initials = document.getElementById('dash-avatar-initials');
+  if (stored) {
+    img.src = stored;
+    img.classList.remove('hidden');
+    if (initials) initials.classList.add('hidden');
+  } else {
+    img.classList.add('hidden');
+    if (initials) initials.classList.remove('hidden');
+  }
+}
+
+function initDashHeader() {
+  // Date
+  const now = new Date();
+  const dateEl = document.getElementById('dash-date');
+  if (dateEl) {
+    dateEl.textContent = `${DAYS_ES[now.getDay()]}, ${now.getDate()} ${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  // Avatar display
+  refreshDashAvatar();
+
+  // Avatar click → go to profile tab to change photo
+  document.getElementById('dash-avatar')?.addEventListener('click', () => {
+    switchTab('profile');
+  });
 }
 
 // ─── Install Prompt (A2HS) ────────────────────────────────────────────────────
