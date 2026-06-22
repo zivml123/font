@@ -30,19 +30,26 @@ function computeStats() {
   const total = state.numWeeks * DAYS_PER_WEEK * SUBS.length;
   let done = 0, fail = 0, streak = 0, streakRunning = true;
 
-  // Iterate sub-sessions in chronological order
+  // Streak counts consecutive fully-completed DAYS (not individual sub-sessions)
   for (let w = 1; w <= state.numWeeks; w++) {
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
-      for (const sub of SUBS) {
-        const s = prog[workoutKey(w, d, sub)];
-        if (s === 'done') { done++; if (streakRunning) streak++; }
-        else if (s === 'fail') { fail++; streakRunning = false; }
-        else streakRunning = false;
+      const statuses = SUBS.map(s => prog[workoutKey(w, d, s)]);
+      done += statuses.filter(s => s === 'done').length;
+      fail += statuses.filter(s => s === 'fail').length;
+      const dayFullyDone = statuses.every(s => s === 'done');
+      const dayHasFail   = statuses.some(s => s === 'fail');
+      if (dayFullyDone) {
+        if (streakRunning) streak++;
+      } else {
+        // Any incomplete or failed day breaks the streak
+        if (dayHasFail || statuses.some(s => s !== null && s !== undefined)) {
+          streakRunning = false;
+        }
       }
     }
   }
 
-  return { done, fail, streak, pct: Math.round((done / total) * 100), total };
+  return { done, fail, streak, pct: total ? Math.round((done / total) * 100) : 0, total };
 }
 
 // ─── Day card status ──────────────────────────────────────────────────────────

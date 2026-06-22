@@ -1,5 +1,5 @@
-// Workout starts Monday June 23, 2026
-export const START_MONDAY = new Date(2026, 5, 23); // month is 0-indexed
+// Workout starts Monday June 22, 2026
+export const START_MONDAY = new Date(2026, 5, 22); // month is 0-indexed; June 22 = Monday
 
 // Offsets from Monday (0=Mon, 1=Tue, 3=Thu, 4=Fri)
 export const DAY_OFFSETS = [0, 1, 3, 4];

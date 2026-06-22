@@ -230,6 +230,7 @@ function bindProfileEvents(el) {
         objetivos: { kcal_meta, proteina_meta_g, peso_meta_kg, grasa_meta_pct },
       });
       set('profile', updated);
+      window.__refreshDashPills?.();
       toastSaved();
     } catch (e) {
       toastError('Error guardando: ' + e.message);

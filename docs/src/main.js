@@ -4,6 +4,8 @@ import { renderFood } from './views/food.js';
 import { renderProgress } from './views/progress.js';
 import { renderProfile } from './views/profile.js';
 import { renderAuth, hideAuth } from './views/auth.js';
+import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS } from './workoutData.js';
+import { getNumWeeks } from './storage.js';
 
 const VIEWS = {
   workout: renderWorkout,
@@ -138,7 +140,7 @@ export function refreshDashAvatar() {
   }
 }
 
-function loadTodayStats() {
+async function loadTodayStats() {
   try {
     const today = dateStr(new Date());
     const meals = JSON.parse(localStorage.getItem(`zivplan_meals_${today}`) || '[]');
@@ -146,8 +148,23 @@ function loadTodayStats() {
     const prot = meals.reduce((s, m) => s + (m.protein || 0), 0);
 
     const prog = JSON.parse(localStorage.getItem('zivplan_workout_progress') || '{}');
-    const doneCount = Object.values(prog).filter(v => v === 'done').length;
-    const failCount = Object.values(prog).filter(v => v === 'fail').length;
+    const numWeeks = await getNumWeeks();
+
+    // Find today's workout day in the schedule (not all-time counts)
+    let todayDone = 0, todayFail = 0, todayHasSchedule = false;
+    outer: for (let w = 1; w <= numWeeks; w++) {
+      for (let d = 0; d < DAYS_PER_WEEK; d++) {
+        if (dateStr(getDateFor(w, d)) === today) {
+          todayHasSchedule = true;
+          for (const sub of SUBS) {
+            const st = prog[workoutKey(w, d, sub)];
+            if (st === 'done') todayDone++;
+            if (st === 'fail') todayFail++;
+          }
+          break outer;
+        }
+      }
+    }
 
     const kcalEl = document.getElementById('dash-kcal-val');
     const protEl = document.getElementById('dash-prot-val');
@@ -156,14 +173,20 @@ function loadTodayStats() {
     if (kcalEl) kcalEl.textContent = kcal > 0 ? kcal.toLocaleString() : '0';
     if (protEl) protEl.textContent = prot > 0 ? `${prot}g` : '—';
     if (wrkEl) {
-      if (doneCount > 0) {
-        wrkEl.textContent = `${doneCount} ✓`;
+      if (!todayHasSchedule) {
+        wrkEl.textContent = 'Rest';
+        wrkEl.className = 'dash-today-val';
+      } else if (todayDone === SUBS.length) {
+        wrkEl.textContent = '✓ Hecho';
         wrkEl.className = 'dash-today-val done';
-      } else if (failCount > 0) {
-        wrkEl.textContent = `${failCount} ✗`;
+      } else if (todayDone > 0) {
+        wrkEl.textContent = `${todayDone}/${SUBS.length}`;
+        wrkEl.className = 'dash-today-val accent';
+      } else if (todayFail > 0) {
+        wrkEl.textContent = '✗ Fallé';
         wrkEl.className = 'dash-today-val fail';
       } else {
-        wrkEl.textContent = '—';
+        wrkEl.textContent = 'Pendiente';
         wrkEl.className = 'dash-today-val';
       }
     }
@@ -198,6 +221,9 @@ function initDashHeader() {
   // Avatar display
   refreshDashAvatar();
 
+  // Populate pills from profile
+  updateDashPills();
+
   // Today stats
   loadTodayStats();
 
@@ -207,8 +233,38 @@ function initDashHeader() {
   });
 }
 
+function updateDashPills() {
+  try {
+    const raw = localStorage.getItem('zivplan_profile');
+    const p = raw ? JSON.parse(raw) : null;
+    if (!p) return;
+
+    const weightEl = document.getElementById('dash-pill-weight');
+    const fatEl    = document.getElementById('dash-pill-fat');
+    const protEl   = document.getElementById('dash-pill-prot');
+
+    const curWeight = p.inbody_current?.peso_kg;
+    const metaWeight = p.objetivos?.peso_meta_kg;
+    if (weightEl && curWeight && metaWeight) {
+      weightEl.textContent = `${curWeight} → ${metaWeight} kg`;
+    }
+
+    const curFat = p.inbody_current?.grasa_pct;
+    const metaFat = p.objetivos?.grasa_meta_pct;
+    if (fatEl && curFat && metaFat) {
+      fatEl.textContent = `${curFat}% → ${metaFat}% grasa`;
+    }
+
+    const prot = p.objetivos?.proteina_meta_g;
+    if (protEl && prot) {
+      protEl.textContent = `${prot}g prot/día`;
+    }
+  } catch {}
+}
+
 // Refresh today stats when a view saves data
 window.__refreshDashStats = loadTodayStats;
+window.__refreshDashPills = updateDashPills;
 
 // ─── Install Prompt (A2HS) ────────────────────────────────────────────────────
 function initInstallPrompt() {

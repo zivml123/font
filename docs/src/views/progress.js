@@ -45,18 +45,32 @@ export async function renderProgress() {
 
 const RING_CIRC = 314.16; // 2π × 50
 
-function calcDailyTasks(mealRows, weightLog, prog) {
+// Module-level chart instances — destroyed before recreating to prevent Chart.js memory leak
+let _nutritionChart = null;
+let _weightChart = null;
+
+function calcDailyTasks(mealRows, weightLog, prog, numWeeks) {
   const todayDs = dateStr(new Date());
   const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const mealToday = mealRows.some(r => r.date === todayDs && r.kcal > 0);
   const weightRecent = weightLog.some(e => new Date(e.date + 'T00:00:00') >= oneWeekAgo);
-  const anyWorkout = Object.values(prog).some(v => v === 'done');
+
+  // Check if TODAY has a workout day and at least one sub-session is done
+  let workoutToday = false;
+  outer: for (let w = 1; w <= numWeeks; w++) {
+    for (let d = 0; d < DAYS_PER_WEEK; d++) {
+      if (dateStr(getDateFor(w, d)) === todayDs) {
+        workoutToday = SUBS.some(s => prog[workoutKey(w, d, s)] === 'done');
+        break outer;
+      }
+    }
+  }
 
   const tasks = [
     { label: 'Comida registrada', icon: '🍽️', done: mealToday },
     { label: 'Peso esta semana', icon: '⚖️', done: weightRecent },
-    { label: 'Entreno completado', icon: '🏋️', done: anyWorkout },
+    { label: 'Entreno hoy',       icon: '🏋️', done: workoutToday },
   ];
   const done = tasks.filter(t => t.done).length;
   return { tasks, done, total: tasks.length, pct: Math.round((done / tasks.length) * 100) };
@@ -83,18 +97,21 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
   const avgProt = Math.round(days7.reduce((s, d) => s + d.protein, 0) / 7);
   const daysLogged = days7.filter(d => d.kcal > 0).length;
 
-  // Weight progress
+  // Weight progress — guard against division by zero when start === target
   const latestWeight = weightLog.length ? weightLog[weightLog.length - 1].weight_kg : ib.peso_kg;
   const startWeight = ib.peso_kg;
   const targetWeight = goals.peso_meta_kg;
-  const progressPct = Math.min(100, Math.max(0, ((startWeight - latestWeight) / (startWeight - targetWeight)) * 100));
+  const weightRange = startWeight - targetWeight;
+  const progressPct = weightRange === 0
+    ? 100
+    : Math.min(100, Math.max(0, ((startWeight - latestWeight) / weightRange) * 100));
 
   // Workout heatmap
   const prog = state.workoutProgress;
   const heatmapCells = buildHeatmap(numWeeks, prog);
 
   // Daily tasks ring
-  const daily = calcDailyTasks(mealRows, weightLog, prog);
+  const daily = calcDailyTasks(mealRows, weightLog, prog, numWeeks);
 
   // InBody comparison
   const prevIb = history.length ? history[history.length - 1] : null;
@@ -304,8 +321,9 @@ function buildHeatmap(numWeeks, prog) {
 function drawNutritionChart(days7, goals) {
   const canvas = document.getElementById('nutrition-chart');
   if (!canvas || !window.Chart) return;
+  if (_nutritionChart) { _nutritionChart.destroy(); _nutritionChart = null; }
 
-  new window.Chart(canvas, {
+  _nutritionChart = new window.Chart(canvas, {
     type: 'bar',
     data: {
       labels: days7.map(d => d.label),
@@ -364,12 +382,13 @@ function drawNutritionChart(days7, goals) {
 function drawWeightChart(weightLog, targetKg) {
   const canvas = document.getElementById('weight-chart');
   if (!canvas || !window.Chart) return;
+  if (_weightChart) { _weightChart.destroy(); _weightChart = null; }
 
   const labels = weightLog.map(e => fmtDate(e.date));
   const data = weightLog.map(e => e.weight_kg);
   const targetLine = data.map(() => targetKg);
 
-  new window.Chart(canvas, {
+  _weightChart = new window.Chart(canvas, {
     type: 'line',
     data: {
       labels,

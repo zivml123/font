@@ -14,11 +14,25 @@ export function setBackendUrl(url) {
 async function callBackend(endpoint, body) {
   const base = getBackendUrl();
   if (!base) throw new Error('Backend URL no configurada. Ve a Perfil → IA para configurarla.');
-  const resp = await fetch(`${base}${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30_000);
+
+  let resp;
+  try {
+    resp = await fetch(`${base}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('El servidor tardó demasiado. Intenta de nuevo.');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.error || `Error ${resp.status}`);
