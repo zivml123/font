@@ -1,21 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1E0C06"/>
-      <stop offset="100%" stop-color="#121212"/>
-    </linearGradient>
-  </defs>
-  <!-- Background -->
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <!-- Top accent stripe -->
-  <rect width="512" height="14" fill="#FF4D1C"/>
-  <!-- Z letterform (top bar + diagonal + bottom bar merged) -->
-  <!-- Top horizontal bar -->
-  <rect x="72" y="88" width="368" height="80" rx="6" fill="#FF4D1C"/>
-  <!-- Diagonal band: parallelogram -->
-  <polygon points="300,168 440,168 212,344 72,344" fill="#FF4D1C"/>
-  <!-- Bottom horizontal bar -->
-  <rect x="72" y="344" width="368" height="80" rx="6" fill="#FF4D1C"/>
-  <!-- Accent dot -->
-  <circle cx="436" cy="436" r="18" fill="#ECECEC" opacity="0.5"/>
+  <rect width="512" height="512" fill="#080808"/>
+  <rect width="512" height="18" fill="#A8FF00"/>
+  <!-- Barbell bar -->
+  <rect x="100" y="218" width="312" height="76" rx="4" fill="#A8FF00"/>
+  <!-- Left weight plate -->
+  <rect x="56" y="148" width="44" height="216" rx="6" fill="#A8FF00"/>
+  <!-- Left collar -->
+  <rect x="100" y="176" width="20" height="160" rx="3" fill="#A8FF00"/>
+  <!-- Right weight plate -->
+  <rect x="412" y="148" width="44" height="216" rx="6" fill="#A8FF00"/>
+  <!-- Right collar -->
+  <rect x="392" y="176" width="20" height="160" rx="3" fill="#A8FF00"/>
+  <!-- Groove details on plates -->
+  <rect x="80" y="180" width="20" height="152" rx="2" fill="#1A2900"/>
+  <rect x="432" y="180" width="20" height="152" rx="2" fill="#1A2900"/>
+  <!-- Bottom stripe -->
+  <rect x="0" y="498" width="512" height="14" fill="#A8FF00"/>
 </svg>

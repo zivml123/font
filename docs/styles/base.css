@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
 :root {
-  --bg: #121212;
-  --panel: #1B1B1B;
-  --panel2: #212121;
-  --line: #2E2E2E;
-  --text: #ECECEC;
-  --muted: #8A8A8A;
-  --accent: #FF4D1C;
-  --accent-dim: #4A1C0E;
-  --done: #3DDC84;
-  --done-dim: #143324;
-  --fail: #E0394C;
-  --fail-dim: #3A1418;
+  --bg: #080808;
+  --panel: #151515;
+  --panel2: #1E1E1E;
+  --line: #2A2A2A;
+  --text: #EAEAEA;
+  --muted: #8E8E93;
+  --accent: #A8FF00;
+  --accent-dim: #1A2900;
+  --done: #16A34A;
+  --done-dim: #0C1F0E;
+  --fail: #FF453A;
+  --fail-dim: #3A1010;
   --gold: #E8B33D;
   --gold-dim: #3A2E10;
   --radius: 12px;
@@ -39,33 +39,95 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Loading Screen ─────────────────────────────────────── */
+/* ─── Splash / Loading Screen ────────────────────────────── */
 #loading-screen {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s;
+  overflow: hidden;
+}
+#loading-screen.hidden { opacity: 0; pointer-events: none; }
+.splash-bg {
+  position: absolute;
+  inset: 0;
+  background: url('assets/brand.webp') center center / cover no-repeat;
+  filter: brightness(0.28) saturate(0.6);
+}
+.splash-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 9999;
-  transition: opacity 0.3s;
+  padding: 32px 28px 48px;
+  width: 100%;
+  max-width: 360px;
 }
-#loading-screen.hidden { opacity: 0; pointer-events: none; }
-.loading-logo {
+.splash-logo {
   font-family: 'Oswald', sans-serif;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 700;
   color: var(--accent);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 6px;
+  text-shadow: 0 0 30px rgba(168,255,0,0.4);
 }
-.loading-spinner {
-  width: 28px; height: 28px;
-  border: 3px solid var(--line);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.splash-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+.splash-tagline {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+.splash-accent { color: var(--accent); }
+.splash-bar-wrap {
+  width: 100%;
+}
+.splash-bar-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.splash-bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--panel2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.splash-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 3px;
+  animation: splashLoad 1.6s cubic-bezier(.4,0,.2,1) forwards;
+  box-shadow: 0 0 12px rgba(168,255,0,0.6);
+}
+@keyframes splashLoad {
+  0%   { width: 0%; }
+  40%  { width: 55%; }
+  70%  { width: 78%; }
+  100% { width: 100%; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -142,7 +204,7 @@ body {
 .dash-header {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #1E0C06 0%, #2A1008 50%, #1A1A1A 100%);
+  background: linear-gradient(135deg, #060E00 0%, #0A1500 50%, #0D0D0D 100%);
   border-bottom: 1px solid var(--line);
   padding: 20px 20px 18px;
 }
@@ -152,7 +214,7 @@ body {
   right: -40px;
   width: 200px;
   height: 200px;
-  border: 2px solid rgba(255,77,28,0.10);
+  border: 2px solid rgba(168,255,0,0.10);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -160,7 +222,7 @@ body {
   content: '';
   position: absolute;
   top: 24px; left: 24px; right: 24px; bottom: 24px;
-  border: 1px solid rgba(255,77,28,0.06);
+  border: 1px solid rgba(168,255,0,0.06);
   border-radius: 50%;
 }
 .dash-inner { position: relative; z-index: 1; }
@@ -171,18 +233,18 @@ body {
   gap: 12px;
   margin-bottom: 14px;
 }
-.dash-brand-eyebrow {
+.dash-brand-logo {
   font-family: 'Oswald', sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
   color: var(--accent);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
+  text-shadow: 0 0 20px rgba(168,255,0,0.3);
 }
 .dash-brand-name {
   font-family: 'Oswald', sans-serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.05;

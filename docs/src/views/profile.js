@@ -23,13 +23,14 @@ export async function renderProfile() {
   const supabase = window.__supabase;
 
   const avatarDataUrl = localStorage.getItem('zivplan_avatar') || '';
+  const avatarSrc = avatarDataUrl || 'assets/brand.webp';
   el.innerHTML = `
     <div class="profile-view">
       <!-- Header with photo upload -->
       <div class="profile-header">
         <div class="profile-avatar-upload" id="profile-avatar-upload" title="Cambiar foto de perfil">
-          <img id="profile-avatar-photo" class="profile-avatar-photo ${avatarDataUrl ? '' : 'hidden'}" src="${escAttr(avatarDataUrl)}" alt="foto">
-          <span id="profile-avatar-letters" class="profile-avatar-letters ${avatarDataUrl ? 'hidden' : ''}">${initials}</span>
+          <img id="profile-avatar-photo" class="profile-avatar-photo" src="${escAttr(avatarSrc)}" alt="foto">
+          <span id="profile-avatar-letters" class="profile-avatar-letters hidden">${initials}</span>
           <div class="profile-avatar-overlay">
             <span class="profile-avatar-edit-icon">📷</span>
           </div>
@@ -39,7 +40,7 @@ export async function renderProfile() {
           <div class="profile-name">${escHtml(nombre)}</div>
           <div class="profile-meta">21 años · 171.9 cm · Kosher</div>
           ${state.user ? `<div class="profile-meta" style="margin-top:4px;font-size:11px;">${escHtml(state.user.email)}</div>` : '<div class="profile-meta" style="margin-top:4px;font-size:11px;color:var(--muted);">Modo local · sin cuenta</div>'}
-          <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Eliminar foto</button>
+          <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Restaurar imagen por defecto</button>
         </div>
       </div>
 
@@ -199,13 +200,11 @@ function bindProfileEvents(el) {
   el.querySelector('#btn-remove-photo')?.addEventListener('click', () => {
     localStorage.removeItem('zivplan_avatar');
     const photo = el.querySelector('#profile-avatar-photo');
-    const letters = el.querySelector('#profile-avatar-letters');
     const removeBtn = el.querySelector('#btn-remove-photo');
-    if (photo) { photo.src = ''; photo.classList.add('hidden'); }
-    if (letters) letters.classList.remove('hidden');
+    if (photo) photo.src = 'assets/brand.webp';
     if (removeBtn) removeBtn.style.display = 'none';
     syncDashAvatar(null);
-    toastInfo('Foto eliminada.');
+    toastInfo('Foto restaurada.');
   });
 
   // Save backend URL
@@ -348,11 +347,9 @@ function compressAvatar(file, maxSize) {
 function syncDashAvatar(dataUrl) {
   const img      = document.getElementById('dash-avatar-img');
   const initials = document.getElementById('dash-avatar-initials');
-  if (dataUrl) {
-    if (img) { img.src = dataUrl; img.classList.remove('hidden'); }
-    if (initials) initials.classList.add('hidden');
-  } else {
-    if (img) { img.src = ''; img.classList.add('hidden'); }
-    if (initials) initials.classList.remove('hidden');
+  if (img) {
+    img.src = dataUrl || 'assets/brand.webp';
+    img.classList.remove('hidden');
   }
+  if (initials) initials.classList.add('hidden');
 }

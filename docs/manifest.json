@@ -1,13 +1,13 @@
 {
-  "name": "Ziv Plan Fitness",
-  "short_name": "Ziv Plan",
-  "description": "Tu plan de fitness personalizado: entreno, comida y progreso.",
+  "name": "TRACKLIFE",
+  "short_name": "TRACKLIFE",
+  "description": "Tu mejor versión — entreno, comida y progreso.",
   "start_url": "/font/",
   "scope": "/font/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#121212",
-  "background_color": "#121212",
+  "theme_color": "#A8FF00",
+  "background_color": "#080808",
   "icons": [
     {
       "src": "assets/icon-192.png",

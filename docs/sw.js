@@ -1,5 +1,5 @@
 // Service Worker for GitHub Pages static version
-const CACHE = 'zivplan-static-v5';
+const CACHE = 'tracklife-v1';
 const STATIC = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ const STATIC = [
   './assets/icon-192.png',
   './assets/icon-512.png',
   './assets/apple-touch-icon.png',
+  './assets/brand.webp',
 ];
 
 self.addEventListener('install', e => {

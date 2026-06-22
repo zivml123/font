@@ -6,8 +6,8 @@ export function renderAuth() {
   if (!el) return;
 
   el.innerHTML = `
-    <div class="auth-logo">ZIV PLAN</div>
-    <p class="auth-sub">Tu plan de fitness personal.<br>Inicia sesión para sincronizar en la nube.</p>
+    <div class="auth-logo">-|-TRACKLIFE-|-</div>
+    <p class="auth-sub">Tu mejor versión.<br>Inicia sesión para sincronizar en la nube.</p>
     <form class="auth-form" id="auth-form" novalidate>
       <input class="auth-input" type="email" id="auth-email" placeholder="Correo electrónico" autocomplete="email" inputmode="email">
       <input class="auth-input" type="password" id="auth-password" placeholder="Contraseña" autocomplete="current-password">

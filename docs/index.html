@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#121212">
+  <meta name="theme-color" content="#A8FF00">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ziv Plan Fitness">
+  <meta name="apple-mobile-web-app-title" content="TRACKLIFE">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="description" content="Tu plan de fitness personal — Ziv Mendelson">
+  <meta name="description" content="TRACKLIFE — Tu mejor versión. Entrena, come bien y progresa.">
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
@@ -25,21 +25,29 @@
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/views.css">
 
-  <title>Ziv Plan Fitness</title>
+  <title>TRACKLIFE</title>
 
   <script>
-    // No Supabase on static preview — uses localStorage
     window.__SUPABASE_URL = '';
     window.__SUPABASE_KEY = '';
-    // Detect base path for GitHub Pages (e.g. /font/) vs root
     window.__BASE = location.pathname.replace(/\/[^/]*$/, '/').replace(/\/$/, '') || '';
   </script>
 </head>
 <body>
 
 <div id="loading-screen">
-  <div class="loading-logo">ZIV PLAN FITNESS</div>
-  <div class="loading-spinner"></div>
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="splash-logo">-|-TRACKLIFE-|-</div>
+    <div class="splash-sub">TU MEJOR VERSIÓN</div>
+    <div class="splash-tagline">PLANEA HOY, <span class="splash-accent">PRESUME</span> MAÑANA.</div>
+    <div class="splash-bar-wrap">
+      <div class="splash-bar-label">CARGANDO DISCIPLINA...</div>
+      <div class="splash-bar-track">
+        <div class="splash-bar-fill"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="auth-screen" class="auth-screen hidden"></div>
@@ -49,16 +57,16 @@
 
   <nav id="tab-bar" role="navigation" aria-label="Navegación principal">
     <button class="tab-btn active" data-tab="workout">
-      <span class="tab-icon">🏋️</span>ENTRENO
+      <span class="tab-icon">🏋️</span>ENTRENA
     </button>
     <button class="tab-btn" data-tab="food">
-      <span class="tab-icon">🍽️</span>COMIDA
+      <span class="tab-icon">🥗</span>COME BIEN
     </button>
     <button class="tab-btn" data-tab="progress">
-      <span class="tab-icon">📈</span>PROGRESO
+      <span class="tab-icon">📈</span>PROGRESA
     </button>
     <button class="tab-btn" data-tab="profile">
-      <span class="tab-icon">👤</span>PERFIL
+      <span class="tab-icon">🏆</span>SUPÉRATE
     </button>
   </nav>
 
@@ -74,13 +82,13 @@
       <div class="dash-inner">
         <div class="dash-row">
           <div class="dash-brand">
-            <div class="dash-brand-eyebrow">PLAN DE FITNESS</div>
-            <div class="dash-brand-name" id="dash-name">ZIV MENDELSON</div>
+            <div class="dash-brand-logo">-|-TRACKLIFE-|-</div>
+            <div class="dash-brand-name" id="dash-name">—</div>
             <div class="dash-brand-date" id="dash-date">—</div>
           </div>
           <button class="dash-avatar" id="dash-avatar" aria-label="Foto de perfil" title="Cambiar foto">
-            <img id="dash-avatar-img" class="dash-avatar-img hidden" src="" alt="avatar">
-            <span id="dash-avatar-initials" class="dash-avatar-initials">ZM</span>
+            <img id="dash-avatar-img" class="dash-avatar-img" src="assets/brand.webp" alt="avatar">
+            <span id="dash-avatar-initials" class="dash-avatar-initials hidden">TL</span>
             <div class="dash-avatar-badge">+</div>
           </button>
         </div>

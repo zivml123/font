@@ -402,9 +402,9 @@ function bindProgressEvents(el, weightLog) {
     const prog = state.workoutProgress;
     let done = 0, fail = 0;
     Object.values(prog).forEach(v => { if (v === 'done') done++; if (v === 'fail') fail++; });
-    const text = `💪 Mi semana en Ziv Plan\n\n✅ Entrenos completados: ${done}\n❌ Fallados: ${fail}\n\n🏋️ Meta: bajar de ${INBODY.peso_kg}kg a ${GOALS.peso_meta_kg}kg y grasa de ${INBODY.grasa_pct}% a ${GOALS.grasa_meta_pct}%\n\n#ZivPlan #FitnessKosher`;
+    const text = `💪 Mi semana en TRACKLIFE\n\n✅ Entrenos completados: ${done}\n❌ Fallados: ${fail}\n\n🏋️ Meta: bajar de ${INBODY.peso_kg}kg a ${GOALS.peso_meta_kg}kg y grasa de ${INBODY.grasa_pct}% a ${GOALS.grasa_meta_pct}%\n\n#TRACKLIFE #FitnessKosher`;
     if (navigator.share) {
-      navigator.share({ title: 'Mi semana — Ziv Plan', text });
+      navigator.share({ title: 'Mi semana — TRACKLIFE', text });
     } else {
       navigator.clipboard.writeText(text).then(() => toastInfo('✓ Copiado al portapapeles'));
     }

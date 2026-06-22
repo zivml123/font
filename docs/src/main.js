@@ -120,27 +120,38 @@ const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','
 const DAYS_ES   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 export function refreshDashAvatar() {
-  const avatarBtn = document.getElementById('dash-avatar');
-  if (!avatarBtn) return;
-  const stored = localStorage.getItem('zivplan_avatar');
-  const img = document.getElementById('dash-avatar-img');
+  const img      = document.getElementById('dash-avatar-img');
   const initials = document.getElementById('dash-avatar-initials');
+  if (!img) return;
+  const stored = localStorage.getItem('zivplan_avatar');
   if (stored) {
     img.src = stored;
     img.classList.remove('hidden');
     if (initials) initials.classList.add('hidden');
   } else {
-    img.classList.add('hidden');
-    if (initials) initials.classList.remove('hidden');
+    // fall back to brand image
+    img.src = 'assets/brand.webp';
+    img.classList.remove('hidden');
+    if (initials) initials.classList.add('hidden');
   }
 }
 
 function initDashHeader() {
-  // Date
+  // Live date
   const now = new Date();
   const dateEl = document.getElementById('dash-date');
   if (dateEl) {
     dateEl.textContent = `${DAYS_ES[now.getDay()]}, ${now.getDate()} ${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  // User name from localStorage
+  const nameEl = document.getElementById('dash-name');
+  if (nameEl) {
+    try {
+      const raw = localStorage.getItem('zivplan_profile');
+      const p = raw ? JSON.parse(raw) : null;
+      nameEl.textContent = (p?.nombre || 'ZIV MENDELSON').toUpperCase();
+    } catch { nameEl.textContent = 'ZIV MENDELSON'; }
   }
 
   // Avatar display
