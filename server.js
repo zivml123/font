@@ -6,6 +6,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import webpush from 'web-push';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { readFileSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -25,14 +26,16 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve index.html with injected Supabase config
 app.get('/', (req, res) => {
-  import('fs').then(({ readFileSync }) => {
+  try {
     let html = readFileSync(join(__dirname, 'index.html'), 'utf8');
     html = html
-      .replace("window.__SUPABASE_URL = '';", `window.__SUPABASE_URL = '${process.env.SUPABASE_URL || ''}';`)
-      .replace("window.__SUPABASE_KEY = '';", `window.__SUPABASE_KEY = '${process.env.SUPABASE_ANON_KEY || ''}';`);
+      .replace(/window\.__SUPABASE_URL\s*=\s*'[^']*';[^\n]*/, `window.__SUPABASE_URL = '${process.env.SUPABASE_URL || ''}';`)
+      .replace(/window\.__SUPABASE_KEY\s*=\s*'[^']*';[^\n]*/, `window.__SUPABASE_KEY = '${process.env.SUPABASE_ANON_KEY || ''}';`);
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
-  });
+  } catch (e) {
+    res.status(500).send('Error loading app: ' + e.message);
+  }
 });
 
 app.use(express.static(__dirname));

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ziv Plan">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Tu plan de fitness personal — Ziv Mendelson">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/views.css">
+
+  <title>Ziv Plan — Fitness Personal</title>
+
+  <script>
+    // No Supabase on static preview — uses localStorage
+    window.__SUPABASE_URL = '';
+    window.__SUPABASE_KEY = '';
+    // Detect base path for GitHub Pages (e.g. /font/) vs root
+    window.__BASE = location.pathname.replace(/\/[^/]*$/, '/').replace(/\/$/, '') || '';
+  </script>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loading-logo">ZIV PLAN</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<div id="auth-screen" class="auth-screen hidden"></div>
+<div id="toast-container"></div>
+
+<div id="main-app">
+
+  <nav id="tab-bar" role="navigation" aria-label="Navegación principal">
+    <button class="tab-btn active" data-tab="workout">
+      <span class="tab-icon">🏋️</span>ENTRENO
+    </button>
+    <button class="tab-btn" data-tab="food">
+      <span class="tab-icon">🍽️</span>COMIDA
+    </button>
+    <button class="tab-btn" data-tab="progress">
+      <span class="tab-icon">📈</span>PROGRESO
+    </button>
+    <button class="tab-btn" data-tab="profile">
+      <span class="tab-icon">👤</span>PERFIL
+    </button>
+  </nav>
+
+  <div id="error-banner" class="hidden" role="alert">
+    <span>Error</span>
+    <button aria-label="Cerrar error">✕</button>
+  </div>
+
+  <main id="app">
+
+    <div class="hero">
+      <img class="hero-img" src="assets/cover.jpg" alt="" onerror="this.style.display='none'">
+      <div class="hero-gradient"></div>
+      <div class="hero-no-img">
+        <div class="hero-no-img-text">
+          ZIV — TU MEJOR VERSIÓN<br>
+          "MAÑANA EMPIEZO EL PLAN"<br>
+          HOY ES DÍA DE CARGA<br>
+          SIN CULPA (mentira)<br>
+          CARGANDO DISCIPLINA...
+        </div>
+      </div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">ZIV MENDELSON · 21 años</p>
+        <h1 class="hero-title">Plan Fitness</h1>
+        <div class="hero-sub">
+          <span>79.8 → 74.8 kg</span>
+          <span>18.7% → 15% grasa</span>
+          <span>175g proteína/día</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="workout-view" class="view active" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando entrenos...</div>
+    </div>
+    <div id="food-view" class="view" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando comidas...</div>
+    </div>
+    <div id="progress-view" class="view" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando progreso...</div>
+    </div>
+    <div id="profile-view" class="view" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando perfil...</div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
