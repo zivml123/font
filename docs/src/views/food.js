@@ -36,27 +36,15 @@ export async function renderFood() {
   bindFoodEvents(el);
 }
 
+const KCAL_RING_CIRC = 282.74; // 2π × 45
+
 function renderFoodShell(el, profile) {
-  const ib = profile?.inbody_current || INBODY;
   const goals = profile?.objetivos || GOALS;
   const kcalMeta = goals.kcal_meta || 1950;
   const protMeta = goals.proteina_meta_g || 175;
   const dow = state.menuDow;
 
   el.innerHTML = `
-    <!-- InBody Card -->
-    <div class="inbody-card">
-      <div class="inbody-title">Tu InBody · ${ib.fecha || '19 jun 2026'}</div>
-      <div class="inbody-grid">
-        <div class="inbody-stat"><div class="inbody-val">${ib.peso_kg} kg</div><div class="inbody-lbl">Peso actual</div></div>
-        <div class="inbody-stat"><div class="inbody-val">${ib.grasa_pct}%</div><div class="inbody-lbl">Grasa</div></div>
-        <div class="inbody-stat"><div class="inbody-val">${ib.smm_kg} kg</div><div class="inbody-lbl">Músculo</div></div>
-        <div class="inbody-stat"><div class="inbody-val">${goals.peso_meta_kg} kg</div><div class="inbody-lbl">Meta peso</div></div>
-        <div class="inbody-stat"><div class="inbody-val">${goals.grasa_meta_pct}%</div><div class="inbody-lbl">Meta grasa</div></div>
-        <div class="inbody-stat"><div class="inbody-val">${ib.tmb_kcal}</div><div class="inbody-lbl">TMB kcal</div></div>
-      </div>
-    </div>
-
     <!-- Sub Tabs -->
     <div class="sub-nav">
       <button class="sub-tab ${state.foodSubTab === 'log' ? 'active' : ''}" data-subtab="log">Registro del día</button>
@@ -72,21 +60,35 @@ function renderFoodShell(el, profile) {
         <button class="date-nav-btn" id="btn-date-next">›</button>
       </div>
 
-      <!-- Progress bars -->
-      <div class="progress-section" style="margin-top:12px;" id="macro-bars">
-        <div class="progress-item">
-          <div class="progress-header">
-            <span class="progress-label">Calorías</span>
-            <span class="progress-value kcal" id="kcal-val">0 / ${kcalMeta} kcal</span>
+      <!-- Calorie Ring + Macros -->
+      <div class="kcal-ring-section" id="kcal-ring-section">
+        <div class="kcal-ring-wrap">
+          <svg class="kcal-ring-svg" viewBox="0 0 100 100">
+            <circle class="kcal-ring-bg" cx="50" cy="50" r="45"/>
+            <circle class="kcal-ring-fill" id="kcal-ring-fill" cx="50" cy="50" r="45"
+              style="stroke-dasharray:${KCAL_RING_CIRC.toFixed(2)};stroke-dashoffset:${KCAL_RING_CIRC.toFixed(2)};"/>
+          </svg>
+          <div class="kcal-ring-center">
+            <div class="kcal-ring-num" id="kcal-ring-num">0</div>
+            <div class="kcal-ring-lbl">kcal</div>
           </div>
-          <div class="progress-track"><div class="progress-fill kcal" id="kcal-bar" style="width:0%"></div></div>
         </div>
-        <div class="progress-item">
-          <div class="progress-header">
-            <span class="progress-label">Proteína</span>
-            <span class="progress-value protein" id="prot-val">0 / ${protMeta} g</span>
+        <div class="kcal-ring-meta">
+          <div class="kcal-ring-goal">Meta: ${kcalMeta} kcal</div>
+          <div class="kcal-ring-remaining" id="kcal-ring-remaining">${kcalMeta} restantes</div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+            <div>
+              <div class="progress-header" style="margin-bottom:4px;">
+                <span class="progress-label">Proteína</span>
+                <span class="progress-value protein" id="prot-val">0 / ${protMeta} g</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill protein" id="prot-bar" style="width:0%"></div></div>
+            </div>
+            <div class="macro-pills-row">
+              <span class="macro-pill">C: <strong id="carbs-val">0g</strong></span>
+              <span class="macro-pill">G: <strong id="fat-val">0g</strong></span>
+            </div>
           </div>
-          <div class="progress-track"><div class="progress-fill protein" id="prot-bar" style="width:0%"></div></div>
         </div>
       </div>
 
@@ -241,18 +243,36 @@ function updateBars(el, meals) {
   const kcalMeta = goals.kcal_meta || 1950;
   const protMeta = goals.proteina_meta_g || 175;
 
-  const totalKcal = meals.reduce((s, m) => s + (m.kcal || 0), 0);
-  const totalProt = meals.reduce((s, m) => s + (m.protein || 0), 0);
+  const totalKcal  = meals.reduce((s, m) => s + (m.kcal    || 0), 0);
+  const totalProt  = meals.reduce((s, m) => s + (m.protein  || 0), 0);
+  const totalCarbs = meals.reduce((s, m) => s + (m.carbs    || 0), 0);
+  const totalFat   = meals.reduce((s, m) => s + (m.fat      || 0), 0);
 
-  const kcalVal = el.querySelector('#kcal-val');
-  const kcalBar = el.querySelector('#kcal-bar');
+  // Calorie ring
+  const ringFill = el.querySelector('#kcal-ring-fill');
+  const ringNum  = el.querySelector('#kcal-ring-num');
+  const ringRem  = el.querySelector('#kcal-ring-remaining');
+  if (ringFill) {
+    const pct = Math.min(1, totalKcal / kcalMeta);
+    ringFill.style.strokeDashoffset = KCAL_RING_CIRC * (1 - pct);
+  }
+  if (ringNum) ringNum.textContent = totalKcal;
+  if (ringRem) ringRem.textContent = `${Math.max(0, kcalMeta - totalKcal)} restantes`;
+
+  // Macro bars
   const protVal = el.querySelector('#prot-val');
   const protBar = el.querySelector('#prot-bar');
-
-  if (kcalVal) kcalVal.textContent = `${totalKcal} / ${kcalMeta} kcal`;
-  if (kcalBar) kcalBar.style.width = `${Math.min(100, (totalKcal / kcalMeta) * 100)}%`;
   if (protVal) protVal.textContent = `${totalProt} / ${protMeta} g`;
   if (protBar) protBar.style.width = `${Math.min(100, (totalProt / protMeta) * 100)}%`;
+
+  // Carbs & fat pills
+  const carbsEl = el.querySelector('#carbs-val');
+  const fatEl   = el.querySelector('#fat-val');
+  if (carbsEl) carbsEl.textContent = `${totalCarbs}g`;
+  if (fatEl)   fatEl.textContent   = `${totalFat}g`;
+
+  // Refresh global stats
+  window.__refreshDashStats?.();
 }
 
 async function handleAnalyzeAndAdd(el, resultData) {

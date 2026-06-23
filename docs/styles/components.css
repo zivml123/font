@@ -19,9 +19,10 @@
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: #080808;
+  font-weight: 700;
 }
-.btn-primary:hover { background: #e63f12; }
+.btn-primary:hover { filter: brightness(1.1); }
 .btn-secondary {
   background: var(--panel2);
   border-color: var(--line);

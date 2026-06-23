@@ -4,7 +4,7 @@ import {
   getWorkoutProgress, getNumWeeks
 } from '../storage.js';
 import { GOALS, INBODY } from '../mealData.js';
-import { DAYS_PER_WEEK, SUBS, workoutKey, getDateFor } from '../workoutData.js';
+import { DAYS_PER_WEEK, SUBS, workoutKey, getDateFor, computeStreak } from '../workoutData.js';
 import { toastSaved, toastError, toastInfo } from '../components/toast.js';
 import { openModal, closeModal } from '../components/modal.js';
 
@@ -248,6 +248,9 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
     </div>
     `}
 
+    <!-- Achievements / Logros -->
+    ${renderAchievements(prog, numWeeks)}
+
     <!-- Push Notifications -->
     <div class="push-card">
       <div class="push-card-title">🔔 Recordatorios</div>
@@ -280,6 +283,33 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
     if (weightLog.length) drawWeightChart(weightLog, goals.peso_meta_kg);
     bindProgressEvents(el, weightLog);
   });
+}
+
+function renderAchievements(prog, numWeeks) {
+  const totalDone = Object.values(prog).filter(v => v === 'done').length;
+  const streak = computeStreak(prog, numWeeks);
+  const all = [
+    { icon: '🥇', title: 'Primer entreno',   desc: 'Completa tu primera sesión',      done: totalDone >= 1 },
+    { icon: '💪', title: '10 sesiones',        desc: 'Completa 10 sesiones en total',   done: totalDone >= 10 },
+    { icon: '🔥', title: '7 días seguidos',    desc: 'Racha de 7 días completados',     done: streak >= 7 },
+    { icon: '⚡', title: '14 días de racha',   desc: 'Racha de 14 días completados',    done: streak >= 14 },
+    { icon: '🏆', title: '25 sesiones',        desc: 'Completa 25 sesiones en total',   done: totalDone >= 25 },
+    { icon: '🌟', title: 'Plan completo',      desc: 'Termina las 4 semanas del plan',  done: totalDone >= 48 },
+  ];
+  return `
+    <div class="chart-card">
+      <div class="chart-title">🏆 Logros</div>
+      <div class="achievements-grid">
+        ${all.map(a => `
+          <div class="achievement-badge ${a.done ? 'done' : 'locked'}">
+            <div class="achievement-icon">${a.icon}</div>
+            <div class="achievement-title">${a.title}</div>
+            <div class="achievement-desc">${a.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderCompareRow(label, oldVal, newVal, direction) {

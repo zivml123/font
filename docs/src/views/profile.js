@@ -4,6 +4,7 @@ import { INBODY, GOALS } from '../mealData.js';
 import { toastSaved, toastError, toastInfo } from '../components/toast.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { getBackendUrl, setBackendUrl } from '../api.js';
+import { computeStreak, DAYS_PER_WEEK, SUBS } from '../workoutData.js';
 
 export async function renderProfile() {
   const el = document.getElementById('profile-view');
@@ -24,6 +25,19 @@ export async function renderProfile() {
 
   const avatarDataUrl = localStorage.getItem('zivplan_avatar') || '';
   const avatarSrc = avatarDataUrl || 'assets/brand.webp';
+
+  // Compute stats from localStorage without extra async calls
+  const prog = JSON.parse(localStorage.getItem('zivplan_workout_progress') || '{}');
+  const numWeeks = JSON.parse(localStorage.getItem('zivplan_num_weeks') || '4');
+  const totalSessions = Object.values(prog).filter(v => v === 'done').length;
+  const streak = computeStreak(prog, numWeeks);
+  const achievements = [
+    { icon: '🥇', title: 'Primer entreno',  done: totalSessions >= 1 },
+    { icon: '💪', title: '10 sesiones',      done: totalSessions >= 10 },
+    { icon: '🔥', title: '7 días racha',     done: streak >= 7 },
+    { icon: '⚡', title: '14 días racha',    done: streak >= 14 },
+  ];
+
   el.innerHTML = `
     <div class="profile-view">
       <!-- Header with photo upload -->
@@ -41,6 +55,35 @@ export async function renderProfile() {
           <div class="profile-meta">21 años · 171.9 cm · Kosher</div>
           ${state.user ? `<div class="profile-meta" style="margin-top:4px;font-size:11px;">${escHtml(state.user.email)}</div>` : '<div class="profile-meta" style="margin-top:4px;font-size:11px;color:var(--muted);">Modo local · sin cuenta</div>'}
           <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Restaurar imagen por defecto</button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="profile-stats-row">
+        <div class="profile-stat-item">
+          <span class="profile-stat-val">${totalSessions}</span>
+          <span class="profile-stat-lbl">Sesiones</span>
+        </div>
+        <div class="profile-stat-item">
+          <span class="profile-stat-val" style="color:var(--accent)">${streak}</span>
+          <span class="profile-stat-lbl">Racha</span>
+        </div>
+        <div class="profile-stat-item">
+          <span class="profile-stat-val" style="color:var(--gold)">${numWeeks * DAYS_PER_WEEK * SUBS.length}</span>
+          <span class="profile-stat-lbl">Total sesiones</span>
+        </div>
+      </div>
+
+      <!-- Achievement Badges -->
+      <div class="profile-section" style="margin-bottom:16px;">
+        <div class="profile-section-title">Logros</div>
+        <div class="achievements-grid" style="padding:12px 16px;">
+          ${achievements.map(a => `
+            <div class="achievement-badge ${a.done ? 'done' : 'locked'}">
+              <div class="achievement-icon">${a.icon}</div>
+              <div class="achievement-title">${a.title}</div>
+            </div>
+          `).join('')}
         </div>
       </div>
 

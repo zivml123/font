@@ -58,18 +58,21 @@
 
 <div id="main-app">
 
-  <nav id="tab-bar" role="navigation" aria-label="Navegación principal">
+  <nav id="tab-bar" class="five-tabs" role="navigation" aria-label="Navegación principal">
     <button class="tab-btn active" data-tab="workout">
       <span class="tab-icon">🏋️</span>ENTRENA
     </button>
     <button class="tab-btn" data-tab="food">
-      <span class="tab-icon">🥗</span>COME BIEN
+      <span class="tab-icon">🥗</span>COME
+    </button>
+    <button class="tab-btn" data-tab="fotos">
+      <span class="tab-icon">📸</span>FOTOS
     </button>
     <button class="tab-btn" data-tab="progress">
       <span class="tab-icon">📈</span>PROGRESA
     </button>
     <button class="tab-btn" data-tab="profile">
-      <span class="tab-icon">🏆</span>SUPÉRATE
+      <span class="tab-icon">🏆</span>PERFIL
     </button>
   </nav>
 
@@ -122,6 +125,9 @@
     </div>
     <div id="food-view" class="view" role="tabpanel">
       <div style="padding:40px;text-align:center;color:var(--muted);">Cargando comidas...</div>
+    </div>
+    <div id="fotos-view" class="view" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando fotos...</div>
     </div>
     <div id="progress-view" class="view" role="tabpanel">
       <div style="padding:40px;text-align:center;color:var(--muted);">Cargando progreso...</div>

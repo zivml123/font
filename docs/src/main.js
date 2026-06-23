@@ -3,6 +3,7 @@ import { renderWorkout } from './views/workout.js';
 import { renderFood } from './views/food.js';
 import { renderProgress } from './views/progress.js';
 import { renderProfile } from './views/profile.js';
+import { renderPhotos } from './views/photos.js';
 import { renderAuth, hideAuth } from './views/auth.js';
 import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS } from './workoutData.js';
 import { getNumWeeks } from './storage.js';
@@ -10,6 +11,7 @@ import { getNumWeeks } from './storage.js';
 const VIEWS = {
   workout: renderWorkout,
   food: renderFood,
+  fotos: renderPhotos,
   progress: renderProgress,
   profile: renderProfile,
 };

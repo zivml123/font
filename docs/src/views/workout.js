@@ -4,7 +4,8 @@ import {
   getDateFor, getWeekDateRange, workoutKey, DAYS_PER_WEEK, SUBS
 } from '../workoutData.js';
 import {
-  getWorkoutProgress, setWorkoutStatus, resetWorkoutProgress, getNumWeeks, setNumWeeks
+  getWorkoutProgress, setWorkoutStatus, resetWorkoutProgress, getNumWeeks, setNumWeeks,
+  dateStr
 } from '../storage.js';
 import { toastSaved, toastFailed, toastError } from '../components/toast.js';
 import { confirmModal, openModal, closeModal } from '../components/modal.js';
@@ -58,6 +59,51 @@ function dayCardClass(w, d) {
   if (statuses.some(s => s === 'fail')) return 'has-fail';
   if (statuses.every(s => s === 'done')) return 'all-done';
   return '';
+}
+
+// ─── Today Card ──────────────────────────────────────────────────────────────
+function renderTodayCard(numWeeks) {
+  const today = dateStr(new Date());
+  const prog = state.workoutProgress;
+
+  for (let w = 1; w <= numWeeks; w++) {
+    for (let d = 0; d < DAYS_PER_WEEK; d++) {
+      if (dateStr(getDateFor(w, d)) === today) {
+        const exercises = WEIGHTS[d];
+        const allDone = SUBS.every(s => prog[workoutKey(w, d, s)] === 'done');
+        const doneCount = SUBS.filter(s => prog[workoutKey(w, d, s)] === 'done').length;
+
+        return `
+          <div class="today-card" id="today-card">
+            <div class="today-card-eyebrow">HOY · SEMANA ${w}</div>
+            <div class="today-card-title">${DAY_NAMES[d]}</div>
+            <div class="today-card-focus">${DAY_FOCUS[d]}</div>
+            <div class="today-card-exercises">
+              ${exercises.slice(0, 3).map(ex => `
+                <div class="today-ex-row">
+                  <span class="today-ex-name">${ex.name}</span>
+                  <span class="today-ex-sets">${ex.sets}×${ex.reps}</span>
+                </div>
+              `).join('')}
+              ${exercises.length > 3 ? `<div class="today-ex-more">+${exercises.length - 3} ejercicios más</div>` : ''}
+            </div>
+            ${allDone
+              ? `<div class="today-card-done">✓ Sesión completada hoy</div>`
+              : `<button class="btn btn-primary btn-full today-card-btn" data-w="${w}" data-d="${d}" id="btn-start-workout">
+                  Iniciar entrenamiento → (${doneCount}/${SUBS.length})
+                </button>`
+            }
+          </div>`;
+      }
+    }
+  }
+
+  return `
+    <div class="today-card today-rest">
+      <div class="today-card-eyebrow">HOY</div>
+      <div class="today-card-title">Día de descanso</div>
+      <div class="today-card-focus">Recuperación activa · vuelves mañana</div>
+    </div>`;
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
@@ -130,6 +176,8 @@ function updateWorkoutView(el) {
   }
 
   el.innerHTML = `
+    ${renderTodayCard(numWeeks)}
+
     <div class="stats-bar">
       <div class="stat-card done">
         <span class="stat-value">${stats.done}</span>
@@ -224,6 +272,22 @@ function renderBlock(w, d, sub) {
 }
 
 function bindWorkoutEvents(el) {
+  // "Iniciar entrenamiento" → scroll to today's day card and expand it
+  el.querySelector('#btn-start-workout')?.addEventListener('click', e => {
+    const w = parseInt(e.currentTarget.dataset.w);
+    const d = parseInt(e.currentTarget.dataset.d);
+    const weekSections = el.querySelectorAll('.week-section');
+    const section = weekSections[w - 1];
+    if (section) {
+      const dayCards = section.querySelectorAll('.day-card');
+      const card = dayCards[d];
+      if (card) {
+        card.classList.add('expanded');
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      }
+    }
+  });
+
   // Expand/collapse day cards
   el.querySelectorAll('.day-header').forEach(header => {
     header.addEventListener('click', () => {

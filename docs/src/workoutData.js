@@ -75,3 +75,19 @@ export function getWeekDateRange(week) {
 export function workoutKey(week, day, sub) {
   return `w${week}d${day}-${sub}`;
 }
+
+export function computeStreak(prog, numWeeks) {
+  let streak = 0, streakRunning = true;
+  for (let w = 1; w <= numWeeks; w++) {
+    for (let d = 0; d < DAYS_PER_WEEK; d++) {
+      const statuses = SUBS.map(s => prog[workoutKey(w, d, s)]);
+      const dayFullyDone = statuses.every(s => s === 'done');
+      if (dayFullyDone) {
+        if (streakRunning) streak++;
+      } else if (statuses.some(s => s !== null && s !== undefined)) {
+        streakRunning = false;
+      }
+    }
+  }
+  return streak;
+}
