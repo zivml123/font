@@ -3,10 +3,7 @@ import { getMeals, addMeal, deleteMeal, dateStr, getProfile } from '../storage.j
 import { analyzeText, analyzePhoto } from '../api.js';
 import { toastSaved, toastFailed, toastError, toastInfo } from '../components/toast.js';
 import { confirmModal, openModal, closeModal } from '../components/modal.js';
-import {
-  DESAYUNO, CENA_ATUN, CENA_SALMON, ALMUERZOS,
-  getCenaForDow, getAlmuerzoForDow, DOW_LABELS, DOW_LABELS_FULL, INBODY, GOALS
-} from '../mealData.js';
+import { WEEKLY_PLAN, GOALS, DOW_LABELS } from '../mealData.js';
 
 const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 const DAYS_ES_FULL = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -136,49 +133,43 @@ function renderFoodShell(el, profile) {
 }
 
 function renderMenuContent(dow) {
-  const cena = getCenaForDow(dow);
-  const almuerzo = getAlmuerzoForDow(dow);
+  const plan = WEEKLY_PLAN[dow] || WEEKLY_PLAN[1];
+
+  function optionCards(options) {
+    return options.map((m, i) => `
+      <div class="menu-option-card">
+        <div class="menu-option-header">
+          <span class="menu-option-num">Opción ${i + 1}</span>
+          <button class="menu-add-btn" data-meal='${JSON.stringify({ ...m, is_plan_meal: true })}'>Agregar al día</button>
+        </div>
+        <div class="menu-option-name">${escHtml(m.item)}</div>
+        <div class="menu-option-stats">
+          <span class="menu-stat-kcal">🔥 ${m.kcal} kcal</span>
+          <span class="menu-stat-prot">💪 ${m.protein}g prot</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function section(emoji, label, options) {
+    if (!options) {
+      return `<div class="menu-section">
+        <div class="menu-section-title">${emoji} ${label}</div>
+        <div class="menu-no-meal">Sin desayuno planificado</div>
+      </div>`;
+    }
+    return `<div class="menu-section">
+      <div class="menu-section-title">${emoji} ${label}</div>
+      <div class="menu-options">${optionCards(options)}</div>
+    </div>`;
+  }
 
   return `
-    <div class="menu-card">
-      <div class="menu-meal-row">
-        <div class="menu-meal-top">
-          <div>
-            <div class="menu-meal-type">Desayuno</div>
-            <div class="menu-meal-name">${DESAYUNO.item}</div>
-            <div class="menu-meal-macros">P:${DESAYUNO.protein}g · C:${DESAYUNO.carbs}g · G:${DESAYUNO.fat}g · ${DESAYUNO.kcal} kcal</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">${DESAYUNO.detail}</div>
-          </div>
-          <button class="menu-add-btn" data-meal='${JSON.stringify({...DESAYUNO, is_plan_meal: true})}'>+ Log</button>
-        </div>
-      </div>
-      <div class="menu-meal-row">
-        <div class="menu-meal-top">
-          <div>
-            <div class="menu-meal-type">Almuerzo</div>
-            <div class="menu-meal-name">${almuerzo.item}</div>
-            <div class="menu-meal-macros">P:${almuerzo.protein}g · C:${almuerzo.carbs}g · G:${almuerzo.fat}g · ${almuerzo.kcal} kcal</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">${almuerzo.detail}</div>
-          </div>
-          <button class="menu-add-btn" data-meal='${JSON.stringify({...almuerzo, is_plan_meal: true})}'>+ Log</button>
-        </div>
-      </div>
-      <div class="menu-meal-row">
-        <div class="menu-meal-top">
-          <div>
-            <div class="menu-meal-type">Cena</div>
-            <div class="menu-meal-name">${cena.item}</div>
-            <div class="menu-meal-macros">P:${cena.protein}g · C:${cena.carbs}g · G:${cena.fat}g · ${cena.kcal} kcal</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">${cena.detail}</div>
-          </div>
-          <button class="menu-add-btn" data-meal='${JSON.stringify({...cena, is_plan_meal: true})}'>+ Log</button>
-        </div>
-      </div>
-    </div>
-    <div style="padding:0 16px 8px;">
+    ${section('☕', 'Desayuno', plan.desayuno)}
+    ${section('🥗', 'Almuerzo', plan.almuerzo)}
+    ${section('🍽️', 'Cena', plan.cena)}
+    <div style="padding:0 16px 16px;">
       <p style="font-size:12px;color:var(--muted);line-height:1.6;">
-        ⚠️ Porciones estimadas con la mano: 1 palma = proteína, 1 puño = carbohidrato, 1 pulgar = grasa.<br>
-        Macros calculados para dieta <strong style="color:var(--done)">100% kosher</strong>.
+        ⚠️ Dieta <strong style="color:var(--done)">100% kosher</strong>. Macros son estimaciones.
       </p>
     </div>
   `;

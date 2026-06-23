@@ -656,6 +656,73 @@
   color: var(--accent);
 }
 
+/* ─── Weekly Menu: multi-option sections ─────────────────── */
+.menu-section {
+  margin: 0 16px 14px;
+}
+.menu-section-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+.menu-no-meal {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 0;
+  font-style: italic;
+}
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.menu-option-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.menu-option-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.menu-option-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.menu-option-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.menu-option-stats {
+  display: flex;
+  gap: 14px;
+}
+.menu-stat-kcal {
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.menu-stat-prot {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ─── Progress Charts ────────────────────────────────────── */
 .chart-card {
   background: var(--panel);

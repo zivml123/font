@@ -1,5 +1,5 @@
 // Pre-calculated macros for the weekly meal plan
-// Porciones medidas con la mano: palma=proteína, puño=carbo, pulgar=grasa
+// Porciones: palma=proteína, puño=carbohidrato, pulgar=grasa
 
 export const INBODY = {
   fecha: '19 jun 2026',
@@ -13,112 +13,73 @@ export const INBODY = {
 };
 
 export const GOALS = {
-  peso_meta_kg: 74.84, // 165 lb
+  peso_meta_kg: 74.84,
   grasa_meta_pct: 15,
   kcal_meta: 1950,
   proteina_meta_g: 175,
 };
 
-// Fixed breakfast — every day
-export const DESAYUNO = {
-  item: '3 huevos + pan integral + ¼ aguacate + café almendra',
-  kcal: 435,
-  protein: 24,
-  carbs: 29,
-  fat: 26,
-  detail: '3 huevos revueltos + 1 pan integral + ¼ aguacate + café con leche de almendra sin azúcar',
-};
-
-// Fixed dinner options — by day of week (0=Sun, 1=Mon, ...)
-// Atún: Lun(1), Mar(2), Jue(4), Dom(0)  → indices 0,1,3,6
-// Salmón: Mié(3), Vie(5), Sáb(6)       → indices 2,4,5
-export const CENA_ATUN = {
-  item: 'Atún en agua + ensalada de vegetales',
-  kcal: 190,
-  protein: 33,
-  carbs: 10,
-  fat: 2,
-  detail: 'Atún en agua SIN salsas + ensalada de vegetales sin límite',
-};
-export const CENA_SALMON = {
-  item: 'Salmón a la plancha + ensalada de vegetales',
-  kcal: 310,
-  protein: 34,
-  carbs: 10,
-  fat: 14,
-  detail: 'Salmón a la plancha/horno SIN aceite extra + ensalada de vegetales sin límite',
-};
-
-// DOW → cena (0=Sun)
-export function getCenaForDow(dow) {
-  return [0, 1, 3].includes(dow % 7) ? CENA_ATUN : CENA_SALMON;
-}
-
-// Lunch options — rotating weekly, one per day of week
-export const ALMUERZOS = [
-  { // Domingo / Lunes
-    item: 'Pollo a la plancha + arroz integral + vegetales',
-    kcal: 430,
-    protein: 45,
-    carbs: 45,
-    fat: 8,
-    detail: '2 palmas pollo a la plancha + 1 puño arroz integral + vegetales a voluntad',
-  },
-  { // Lunes / Martes
-    item: 'Carne res magra + papa + vegetales',
-    kcal: 390,
-    protein: 40,
-    carbs: 35,
-    fat: 10,
-    detail: '2 palmas carne res magra kosher + 1 puño papa cocida + vegetales a voluntad',
-  },
-  { // Martes / Miércoles
-    item: 'Pescado blanco + quinoa + vegetales',
-    kcal: 370,
-    protein: 42,
-    carbs: 40,
-    fat: 5,
-    detail: '2 palmas pescado blanco (tilapia/merluza) + 1 puño quinoa + vegetales a voluntad',
-  },
-  { // Miércoles / Jueves
-    item: 'Pollo al horno + quinoa + vegetales',
-    kcal: 405,
-    protein: 44,
-    carbs: 42,
-    fat: 7,
-    detail: '2 palmas pollo al horno sin piel + 1 puño quinoa + vegetales a voluntad',
-  },
-  { // Jueves / Viernes
-    item: 'Carne picada kosher + arroz integral + vegetales',
-    kcal: 440,
-    protein: 38,
-    carbs: 45,
-    fat: 12,
-    detail: '2 palmas carne picada 90% magra kosher + 1 puño arroz integral + vegetales a voluntad',
-  },
-  { // Viernes / Sábado
-    item: 'Atún en agua + papa + vegetales',
-    kcal: 290,
-    protein: 36,
-    carbs: 32,
-    fat: 2,
-    detail: '2 latas atún en agua + 1 puño papa cocida + vegetales a voluntad',
-  },
-  { // Sábado / Domingo
-    item: 'Pollo salteado + arroz integral + vegetales',
-    kcal: 450,
-    protein: 46,
-    carbs: 48,
-    fat: 9,
-    detail: '2 palmas pollo salteado con vegetales + 1 puño arroz integral',
-  },
-];
-
-// Day-of-week → lunch index
-export function getAlmuerzoForDow(dow) {
-  return ALMUERZOS[dow % 7];
-}
-
-// DOW labels in Spanish
 export const DOW_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 export const DOW_LABELS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+// ─── Shared option arrays ─────────────────────────────────────────────────────
+
+const BREAKFAST_MON_THU = [
+  { item: 'Lata de atún + pan Ezekiel + café con leche de almendra', kcal: 220, protein: 32, carbs: 15, fat: 3 },
+  { item: '3 huevos revueltos + pan Ezekiel + café negro', kcal: 290, protein: 21, carbs: 18, fat: 14 },
+  { item: 'Yogur griego s/azúcar + 30g avena + banana pequeña', kcal: 300, protein: 22, carbs: 45, fat: 5 },
+];
+
+const LUNCH_MON_THU = [
+  { item: '200g pechuga de pollo + ensalada verde + vinagreta light', kcal: 420, protein: 50, carbs: 8, fat: 12 },
+  { item: '200g carne res magra + ensalada verde', kcal: 500, protein: 45, carbs: 5, fat: 22 },
+  { item: '200g pescado blanco + vegetales salteados', kcal: 430, protein: 45, carbs: 10, fat: 14 },
+];
+
+const DINNER_MON_THU = [
+  { item: '200g filete de atún + ensalada', kcal: 350, protein: 45, carbs: 5, fat: 10 },
+  { item: '200g salmón + ensalada', kcal: 500, protein: 40, carbs: 5, fat: 25 },
+  { item: '200g pechuga de pollo + vegetales al vapor', kcal: 380, protein: 50, carbs: 8, fat: 8 },
+];
+
+const LUNCH_FRI_SAT = [
+  { item: 'Pollo + ensalada + papa al horno', kcal: 550, protein: 50, carbs: 35, fat: 12 },
+  { item: 'Carne res + ensalada + arroz', kcal: 650, protein: 45, carbs: 45, fat: 22 },
+  { item: 'Salmón + vegetales + papa', kcal: 650, protein: 40, carbs: 35, fat: 28 },
+];
+
+const DINNER_FRI = [
+  { item: 'Pollo + ensalada (Cena Shabbat)', kcal: 500, protein: 50, carbs: 5, fat: 15 },
+  { item: 'Carne res + ensalada (Cena Shabbat)', kcal: 600, protein: 45, carbs: 5, fat: 30 },
+  { item: 'Pescado + ensalada (Cena Shabbat)', kcal: 550, protein: 40, carbs: 5, fat: 22 },
+];
+
+const DINNER_SAT = [
+  { item: '10 piezas de sushi', kcal: 450, protein: 25, carbs: 60, fat: 8 },
+  { item: 'Carne res + ensalada', kcal: 600, protein: 45, carbs: 5, fat: 30 },
+  { item: 'Pollo + ensalada', kcal: 500, protein: 50, carbs: 5, fat: 15 },
+];
+
+const LUNCH_SUN = [
+  { item: 'Pollo + ensalada + papa', kcal: 550, protein: 50, carbs: 35, fat: 12 },
+  { item: 'Carne res + ensalada + arroz', kcal: 650, protein: 45, carbs: 45, fat: 22 },
+  { item: 'Pescado + vegetales', kcal: 500, protein: 45, carbs: 10, fat: 14 },
+];
+
+const DINNER_SUN = [
+  { item: 'Atún + ensalada', kcal: 350, protein: 45, carbs: 5, fat: 10 },
+  { item: 'Pollo + vegetales', kcal: 380, protein: 50, carbs: 8, fat: 8 },
+  { item: 'Salmón + ensalada', kcal: 500, protein: 40, carbs: 5, fat: 25 },
+];
+
+// ─── Weekly plan — indexed by JS day-of-week (0=Sun … 6=Sat) ─────────────────
+// desayuno: null → show "Sin desayuno planificado"
+export const WEEKLY_PLAN = {
+  0: { desayuno: null,             almuerzo: LUNCH_SUN,     cena: DINNER_SUN },
+  1: { desayuno: BREAKFAST_MON_THU, almuerzo: LUNCH_MON_THU, cena: DINNER_MON_THU },
+  2: { desayuno: BREAKFAST_MON_THU, almuerzo: LUNCH_MON_THU, cena: DINNER_MON_THU },
+  3: { desayuno: BREAKFAST_MON_THU, almuerzo: LUNCH_MON_THU, cena: DINNER_MON_THU },
+  4: { desayuno: BREAKFAST_MON_THU, almuerzo: LUNCH_MON_THU, cena: DINNER_MON_THU },
+  5: { desayuno: null,             almuerzo: LUNCH_FRI_SAT,  cena: DINNER_FRI },
+  6: { desayuno: null,             almuerzo: LUNCH_FRI_SAT,  cena: DINNER_SAT },
+};
