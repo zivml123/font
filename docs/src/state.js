@@ -2,7 +2,8 @@
 const listeners = {};
 
 export const state = {
-  tab: 'workout',            // 'workout' | 'food' | 'progress' | 'profile'
+  tab: 'hoy',                // 'hoy' | 'comidas' | 'entreno' | 'progreso' | 'perfil'
+  progressSubTab: 'fotos',   // 'fotos' | 'medidas' | 'graficas'
   foodSubTab: 'log',         // 'log' | 'menu'
   foodDate: new Date(),      // current date shown in food log
   menuDow: new Date().getDay(), // 0-6

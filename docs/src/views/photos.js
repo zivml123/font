@@ -27,6 +27,11 @@ export async function renderPhotos() {
   renderPhotosView(el);
 }
 
+// Called by progress.js when rendering the Fotos sub-tab
+export function renderPhotosInElement(el) {
+  renderPhotosView(el);
+}
+
 function renderPhotosView(el) {
   const photos = getPhotos();
   const sorted = [...photos].sort((a, b) => a.date.localeCompare(b.date));

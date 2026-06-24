@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#A8FF00">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TRACKLIFE">
@@ -41,11 +41,10 @@
     <div class="splash-avatar-wrap">
       <img src="assets/brand.webp" alt="" class="splash-avatar-img" draggable="false">
     </div>
-    <div class="splash-logo">-|- TRACKLIFE -|-</div>
+    <div class="splash-logo">TRACKLIFE</div>
     <div class="splash-sub">TU MEJOR VERSIÓN</div>
-    <div class="splash-tagline">PLANEA HOY, <span class="splash-accent">PRESUME</span> MAÑANA.</div>
     <div class="splash-bar-wrap">
-      <div class="splash-bar-label">CARGANDO DISCIPLINA...</div>
+      <div class="splash-bar-label">CARGANDO...</div>
       <div class="splash-bar-track">
         <div class="splash-bar-fill"></div>
       </div>
@@ -59,20 +58,20 @@
 <div id="main-app">
 
   <nav id="tab-bar" class="five-tabs" role="navigation" aria-label="Navegación principal">
-    <button class="tab-btn active" data-tab="workout">
-      <span class="tab-icon">🏋️</span>ENTRENA
+    <button class="tab-btn active" data-tab="hoy">
+      <span class="tab-icon">🏠</span>HOY
     </button>
-    <button class="tab-btn" data-tab="food">
-      <span class="tab-icon">🥗</span>COME
+    <button class="tab-btn" data-tab="comidas">
+      <span class="tab-icon">🥗</span>COMIDAS
     </button>
-    <button class="tab-btn" data-tab="fotos">
-      <span class="tab-icon">📸</span>FOTOS
+    <button class="tab-btn" data-tab="entreno">
+      <span class="tab-icon">🏋️</span>ENTRENO
     </button>
-    <button class="tab-btn" data-tab="progress">
-      <span class="tab-icon">📈</span>PROGRESA
+    <button class="tab-btn" data-tab="progreso">
+      <span class="tab-icon">📈</span>PROGRESO
     </button>
-    <button class="tab-btn" data-tab="profile">
-      <span class="tab-icon">🏆</span>PERFIL
+    <button class="tab-btn" data-tab="perfil">
+      <span class="tab-icon">👤</span>PERFIL
     </button>
   </nav>
 
@@ -83,51 +82,14 @@
 
   <main id="app">
 
-    <div class="dash-header">
-      <div class="dash-deco" aria-hidden="true"></div>
-      <div class="dash-inner">
-        <div class="dash-row">
-          <div class="dash-brand">
-            <div class="dash-brand-logo">-|- TRACKLIFE -|-</div>
-            <div class="dash-brand-name" id="dash-name">—</div>
-            <div class="dash-brand-date" id="dash-date">—</div>
-          </div>
-          <button class="dash-avatar" id="dash-avatar" aria-label="Foto de perfil" title="Cambiar foto">
-            <img id="dash-avatar-img" class="dash-avatar-img" src="assets/brand.webp" alt="avatar">
-            <span id="dash-avatar-initials" class="dash-avatar-initials hidden">TL</span>
-            <div class="dash-avatar-badge">✎</div>
-          </button>
-        </div>
-        <div class="dash-pills" id="dash-pills">
-          <span class="dash-pill" id="dash-pill-weight">79.8 → 74.8 kg</span>
-          <span class="dash-pill accent" id="dash-pill-fat">18.7% → 15% grasa</span>
-          <span class="dash-pill" id="dash-pill-prot">175g prot/día</span>
-        </div>
-        <div class="dash-today">
-          <div class="dash-today-item">
-            <span class="dash-today-val accent" id="dash-kcal-val">—</span>
-            <span class="dash-today-lbl">kcal hoy</span>
-          </div>
-          <div class="dash-today-item">
-            <span class="dash-today-val gold" id="dash-prot-val">—</span>
-            <span class="dash-today-lbl">proteína</span>
-          </div>
-          <div class="dash-today-item">
-            <span class="dash-today-val" id="dash-workout-val">—</span>
-            <span class="dash-today-lbl">entreno</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="workout-view" class="view active" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando entrenos...</div>
+    <div id="hoy-view" class="view active" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando...</div>
     </div>
     <div id="food-view" class="view" role="tabpanel">
       <div style="padding:40px;text-align:center;color:var(--muted);">Cargando comidas...</div>
     </div>
-    <div id="fotos-view" class="view" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando fotos...</div>
+    <div id="workout-view" class="view" role="tabpanel">
+      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando entrenos...</div>
     </div>
     <div id="progress-view" class="view" role="tabpanel">
       <div style="padding:40px;text-align:center;color:var(--muted);">Cargando progreso...</div>

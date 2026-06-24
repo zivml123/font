@@ -44,8 +44,8 @@
 /* Daily Progress Ring */
 .daily-ring-section {
   margin: 0 16px 12px;
-  background: linear-gradient(135deg, #0A1500 0%, #151515 100%);
-  border: 1px solid var(--accent);
+  background: var(--panel);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 18px 16px;
 }
@@ -86,7 +86,6 @@
   stroke-dasharray: 314.16;
   stroke-dashoffset: 314.16;
   transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);
-  filter: drop-shadow(0 0 6px rgba(168,255,0,0.45));
 }
 .daily-ring-center {
   position: absolute;
@@ -103,7 +102,6 @@
   font-weight: 700;
   color: var(--accent);
   line-height: 1;
-  text-shadow: 0 0 16px rgba(168,255,0,0.4);
 }
 .daily-ring-sub {
   font-size: 11px;
@@ -392,11 +390,10 @@
 /* ─── Today's Workout Card ───────────────────────────────── */
 .today-card {
   margin: 12px 16px;
-  background: linear-gradient(135deg, #0A1500 0%, #0E1C00 100%);
-  border: 1px solid var(--accent);
+  background: var(--panel2);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 16px;
-  box-shadow: 0 0 24px rgba(168,255,0,0.07);
 }
 .today-rest {
   background: var(--panel);
@@ -435,7 +432,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(168,255,0,0.07);
+  border-bottom: 1px solid var(--line);
 }
 .today-ex-row:last-child { border-bottom: none; }
 .today-ex-name { font-size: 13px; color: var(--text); flex: 1; }
@@ -492,7 +489,6 @@
   stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);
-  filter: drop-shadow(0 0 5px rgba(168,255,0,0.4));
 }
 .kcal-ring-center {
   position: absolute;
@@ -555,9 +551,8 @@
   text-align: center;
 }
 .achievement-badge.done {
-  background: linear-gradient(135deg, #0A1500, #0E1C00);
+  background: var(--panel);
   border-color: var(--accent);
-  box-shadow: 0 0 12px rgba(168,255,0,0.1);
 }
 .achievement-badge.locked { opacity: 0.4; }
 .achievement-icon { font-size: 26px; margin-bottom: 6px; }

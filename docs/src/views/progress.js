@@ -6,7 +6,7 @@ import {
 import { GOALS, INBODY } from '../mealData.js';
 import { DAYS_PER_WEEK, SUBS, workoutKey, getDateFor, computeStreak } from '../workoutData.js';
 import { toastSaved, toastError, toastInfo } from '../components/toast.js';
-import { openModal, closeModal } from '../components/modal.js';
+import { renderPhotosInElement } from './photos.js';
 
 const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -15,73 +15,187 @@ function fmtDate(ds) {
   return `${d.getDate()} ${MONTHS_ES[d.getMonth()]}`;
 }
 
+let _nutritionChart = null;
+let _weightChart = null;
+
 export async function renderProgress() {
   const el = document.getElementById('progress-view');
   if (!el) return;
   el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">Cargando...</div>';
 
   try {
-    const [weightLog, profile, numWeeks, workoutProgress] = await Promise.all([
+    const today = new Date();
+    const sevenAgo = new Date(today);
+    sevenAgo.setDate(today.getDate() - 6);
+
+    const [weightLog, profile, numWeeks, workoutProgress, mealRows] = await Promise.all([
       getWeightLog(),
       getProfile(),
       getNumWeeks(),
-      Object.keys(state.workoutProgress).length ? Promise.resolve(state.workoutProgress) : getWorkoutProgress(),
+      Object.keys(state.workoutProgress).length
+        ? Promise.resolve(state.workoutProgress)
+        : getWorkoutProgress(),
+      getMealsRange(dateStr(sevenAgo), dateStr(today)),
     ]);
+
     set('weightLog', weightLog);
     if (profile) set('profile', profile);
     set('workoutProgress', workoutProgress);
 
-    // 7-day meal range
-    const today = new Date();
-    const sevenAgo = new Date(today);
-    sevenAgo.setDate(today.getDate() - 6);
-    const mealRows = await getMealsRange(dateStr(sevenAgo), dateStr(today));
+    const data = { weightLog, profile, mealRows, numWeeks, workoutProgress };
 
-    renderProgressView(el, { weightLog, profile, mealRows, numWeeks });
+    el.innerHTML = `
+      <div class="sub-nav">
+        <button class="sub-tab" data-sub="fotos">FOTOS</button>
+        <button class="sub-tab" data-sub="medidas">MEDIDAS</button>
+        <button class="sub-tab" data-sub="graficas">GRÁFICAS</button>
+      </div>
+      <div id="progress-sub-content"></div>
+    `;
+
+    const subEl = el.querySelector('#progress-sub-content');
+
+    function showSub(sub) {
+      set('progressSubTab', sub);
+      el.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b.dataset.sub === sub));
+      renderProgressSubTab(subEl, sub, data);
+    }
+
+    el.querySelectorAll('.sub-tab').forEach(btn => {
+      btn.addEventListener('click', () => showSub(btn.dataset.sub));
+    });
+
+    showSub(state.progressSubTab || 'fotos');
+
   } catch (e) {
     el.innerHTML = `<div style="padding:32px 16px;color:var(--fail);">Error cargando datos: ${e.message}</div>`;
   }
 }
 
-const RING_CIRC = 314.16; // 2π × 50
-
-// Module-level chart instances — destroyed before recreating to prevent Chart.js memory leak
-let _nutritionChart = null;
-let _weightChart = null;
-
-function calcDailyTasks(mealRows, weightLog, prog, numWeeks) {
-  const todayDs = dateStr(new Date());
-  const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-  const mealToday = mealRows.some(r => r.date === todayDs && r.kcal > 0);
-  const weightRecent = weightLog.some(e => new Date(e.date + 'T00:00:00') >= oneWeekAgo);
-
-  // Check if TODAY has a workout day and at least one sub-session is done
-  let workoutToday = false;
-  outer: for (let w = 1; w <= numWeeks; w++) {
-    for (let d = 0; d < DAYS_PER_WEEK; d++) {
-      if (dateStr(getDateFor(w, d)) === todayDs) {
-        workoutToday = SUBS.some(s => prog[workoutKey(w, d, s)] === 'done');
-        break outer;
-      }
-    }
+function renderProgressSubTab(subEl, sub, data) {
+  if (sub === 'fotos') {
+    renderFotos(subEl);
+  } else if (sub === 'medidas') {
+    renderMedidas(subEl, data);
+  } else {
+    renderGraficas(subEl, data);
   }
-
-  const tasks = [
-    { label: 'Comida registrada', icon: '🍽️', done: mealToday },
-    { label: 'Peso esta semana', icon: '⚖️', done: weightRecent },
-    { label: 'Entreno hoy',       icon: '🏋️', done: workoutToday },
-  ];
-  const done = tasks.filter(t => t.done).length;
-  return { tasks, done, total: tasks.length, pct: Math.round((done / tasks.length) * 100) };
 }
 
-function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
-  const ib = profile?.inbody_current || INBODY;
-  const goals = profile?.objetivos || GOALS;
+// ─── Fotos ────────────────────────────────────────────────────────────────────
+function renderFotos(subEl) {
+  renderPhotosInElement(subEl);
+}
+
+// ─── Medidas ──────────────────────────────────────────────────────────────────
+function renderMedidas(subEl, { weightLog, profile }) {
+  const ib     = profile?.inbody_current || INBODY;
+  const goals  = profile?.objetivos      || GOALS;
   const history = profile?.inbody_history || [];
 
-  // Build 7-day daily totals
+  const latestWeight = weightLog.length ? weightLog[weightLog.length - 1].weight_kg : ib.peso_kg;
+  const startWeight  = ib.peso_kg;
+  const targetWeight = goals.peso_meta_kg;
+  const weightRange  = startWeight - targetWeight;
+  const progressPct  = weightRange === 0
+    ? 100
+    : Math.min(100, Math.max(0, ((startWeight - latestWeight) / weightRange) * 100));
+
+  const prevIb = history.length ? history[history.length - 1] : null;
+
+  subEl.innerHTML = `
+    <div class="chart-card">
+      <div class="chart-title">⚖️ Progreso de Peso</div>
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--muted);">Actual</span>
+          <span style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--gold)">${latestWeight} kg</span>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:10px;">
+          <span>Inicio: <strong style="color:var(--text)">${startWeight} kg</strong></span>
+          <span>Meta: <strong style="color:var(--done)">${targetWeight} kg</strong></span>
+          <span style="color:${latestWeight < startWeight ? 'var(--done)' : 'var(--fail)'}">
+            <strong>${latestWeight < startWeight ? '−' : '+'}${Math.abs(latestWeight - startWeight).toFixed(1)} kg</strong>
+          </span>
+        </div>
+        <div class="progress-track" style="height:8px;">
+          <div class="progress-fill" style="background:var(--gold);width:${progressPct.toFixed(1)}%;height:100%;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${progressPct.toFixed(0)}% hacia la meta</div>
+      </div>
+
+      ${weightLog.length ? `
+        <div class="chart-canvas-wrap">
+          <canvas id="weight-chart"></canvas>
+        </div>
+      ` : '<p style="font-size:13px;color:var(--muted);">Sin datos de peso aún.</p>'}
+
+      <div class="weight-input-row">
+        <input class="weight-input" type="number" id="weight-input" placeholder="${latestWeight}" step="0.1" min="40" max="200" inputmode="decimal">
+        <button class="btn btn-secondary" id="btn-log-weight" style="white-space:nowrap;">Registrar hoy</button>
+      </div>
+
+      ${weightLog.length ? `
+        <div class="weight-history" style="margin-top:10px;">
+          ${weightLog.slice(-5).reverse().map(e => `
+            <div class="weight-entry">
+              <span class="weight-date">${fmtDate(e.date)}</span>
+              <span class="weight-val">${e.weight_kg} kg</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+
+    ${prevIb ? `
+      <div class="chart-card">
+        <div class="chart-title">📊 Comparativa InBody</div>
+        <div style="display:flex;gap:8px;font-size:11px;color:var(--muted);margin-bottom:10px;">
+          <span style="flex:1;">Métrica</span>
+          <span style="width:70px;text-align:right;">Anterior</span>
+          <span style="width:70px;text-align:right;">Actual</span>
+          <span style="width:56px;text-align:right;">Delta</span>
+        </div>
+        <div class="inbody-compare">
+          ${renderCompareRow('Peso (kg)',    prevIb.peso_kg,  ib.peso_kg,  -1)}
+          ${renderCompareRow('Grasa %',      prevIb.grasa_pct, ib.grasa_pct, -1)}
+          ${renderCompareRow('Músculo (kg)', prevIb.smm_kg,   ib.smm_kg,    1)}
+          ${renderCompareRow('TMB kcal',     prevIb.tmb_kcal, ib.tmb_kcal,  1)}
+        </div>
+      </div>
+    ` : `
+      <div class="chart-card">
+        <div class="chart-title">📊 Comparativa InBody</div>
+        <p style="font-size:13px;color:var(--muted);">Registra tu próximo InBody en Perfil para ver la comparativa.</p>
+      </div>
+    `}
+  `;
+
+  if (weightLog.length) {
+    requestAnimationFrame(() => drawWeightChart(weightLog, targetWeight));
+  }
+
+  subEl.querySelector('#btn-log-weight')?.addEventListener('click', async () => {
+    const input = subEl.querySelector('#weight-input');
+    const kg = parseFloat(input?.value);
+    if (!kg || kg < 40 || kg > 200) { toastInfo('Ingresa un peso válido (40–200 kg).'); return; }
+    try {
+      const entry = await addWeightEntry(dateStr(new Date()), kg);
+      weightLog.push(entry);
+      set('weightLog', weightLog);
+      toastSaved();
+      renderMedidas(subEl, { weightLog, profile });
+    } catch (e) {
+      toastError('Error guardando peso: ' + e.message);
+    }
+  });
+}
+
+// ─── Gráficas ─────────────────────────────────────────────────────────────────
+function renderGraficas(subEl, { weightLog, profile, mealRows, numWeeks, workoutProgress }) {
+  const goals = profile?.objetivos || GOALS;
+  const prog  = workoutProgress || state.workoutProgress;
+
   const today = new Date();
   const days7 = [];
   for (let i = 6; i >= 0; i--) {
@@ -93,31 +207,16 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
     if (day) { day.kcal += r.kcal || 0; day.protein += r.protein || 0; }
   });
 
-  const avgKcal = Math.round(days7.reduce((s, d) => s + d.kcal, 0) / 7);
-  const avgProt = Math.round(days7.reduce((s, d) => s + d.protein, 0) / 7);
+  const avgKcal    = Math.round(days7.reduce((s, d) => s + d.kcal, 0) / 7);
+  const avgProt    = Math.round(days7.reduce((s, d) => s + d.protein, 0) / 7);
   const daysLogged = days7.filter(d => d.kcal > 0).length;
 
-  // Weight progress — guard against division by zero when start === target
-  const latestWeight = weightLog.length ? weightLog[weightLog.length - 1].weight_kg : ib.peso_kg;
-  const startWeight = ib.peso_kg;
-  const targetWeight = goals.peso_meta_kg;
-  const weightRange = startWeight - targetWeight;
-  const progressPct = weightRange === 0
-    ? 100
-    : Math.min(100, Math.max(0, ((startWeight - latestWeight) / weightRange) * 100));
+  const daily = calcDailyTasks(mealRows, weightLog, prog, numWeeks);
+  const RING_CIRC = 314.16;
 
-  // Workout heatmap
-  const prog = state.workoutProgress;
   const heatmapCells = buildHeatmap(numWeeks, prog);
 
-  // Daily tasks ring
-  const daily = calcDailyTasks(mealRows, weightLog, prog, numWeeks);
-
-  // InBody comparison
-  const prevIb = history.length ? history[history.length - 1] : null;
-
-  el.innerHTML = `
-    <!-- Daily Progress Ring -->
+  subEl.innerHTML = `
     <div class="daily-ring-section">
       <div class="daily-ring-eyebrow">PROGRESO DE HOY</div>
       <div class="daily-ring-layout">
@@ -143,8 +242,7 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
       </div>
     </div>
 
-    <!-- Summary Stats -->
-    <div class="summary-grid" style="margin-top:0;">
+    <div class="summary-grid">
       <div class="summary-item">
         <span class="summary-val" style="color:var(--accent)">${avgKcal}</span>
         <div class="summary-lbl">Prom kcal/día</div>
@@ -159,48 +257,6 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
       </div>
     </div>
 
-    <!-- Weight Progress -->
-    <div class="chart-card">
-      <div class="chart-title">⚖️ Progreso de Peso</div>
-      <div style="margin-bottom:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-          <span style="font-size:13px;color:var(--muted);">Inicio → Meta</span>
-          <span style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--gold)">${latestWeight} kg</span>
-        </div>
-        <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:10px;">
-          <span>Inicio: <strong style="color:var(--text)">${startWeight} kg</strong></span>
-          <span>Meta: <strong style="color:var(--done)">${targetWeight} kg</strong></span>
-          <span>Diferencia: <strong style="color:${latestWeight < startWeight ? 'var(--done)' : 'var(--fail)'}">${(latestWeight - startWeight).toFixed(1)} kg</strong></span>
-        </div>
-        <div class="progress-track" style="height:8px;">
-          <div class="progress-fill" style="background:var(--gold);width:${progressPct.toFixed(1)}%;height:100%;"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${progressPct.toFixed(0)}% del camino hacia la meta</div>
-      </div>
-      ${weightLog.length ? `
-        <div class="chart-canvas-wrap">
-          <canvas id="weight-chart"></canvas>
-        </div>
-      ` : '<p style="font-size:13px;color:var(--muted);">Sin datos de peso aún.</p>'}
-
-      <!-- Weight log input -->
-      <div class="weight-input-row">
-        <input class="weight-input" type="number" id="weight-input" placeholder="78.5" step="0.1" min="40" max="200" inputmode="decimal">
-        <button class="btn btn-secondary" id="btn-log-weight" style="white-space:nowrap;">Registrar hoy</button>
-      </div>
-      ${weightLog.length ? `
-        <div class="weight-history" style="margin-top:10px;">
-          ${weightLog.slice(-5).reverse().map(e => `
-            <div class="weight-entry">
-              <span class="weight-date">${fmtDate(e.date)}</span>
-              <span class="weight-val">${e.weight_kg} kg</span>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    </div>
-
-    <!-- 7-Day Nutrition Chart -->
     <div class="chart-card">
       <div class="chart-title">🍽️ Nutrición — últimos 7 días</div>
       <div class="chart-canvas-wrap">
@@ -208,7 +264,6 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
       </div>
     </div>
 
-    <!-- Workout Heatmap -->
     <div class="chart-card">
       <div class="chart-title">🏋️ Heatmap de Entrenos</div>
       <div style="display:flex;gap:6px;margin-bottom:8px;">
@@ -216,7 +271,6 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--done);margin-right:3px;vertical-align:middle;"></span>Hecho
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--fail);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Fallado
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Parcial
-          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--line);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Sin registrar
         </span>
       </div>
       <div class="heatmap-grid" style="grid-template-columns:repeat(${numWeeks * 4},1fr);">
@@ -224,34 +278,8 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
       </div>
     </div>
 
-    <!-- InBody Comparison -->
-    ${history.length > 0 ? `
-    <div class="chart-card">
-      <div class="chart-title">📊 Comparativa InBody</div>
-      <div style="display:flex;gap:8px;font-size:11px;color:var(--muted);margin-bottom:10px;">
-        <span style="flex:1;">Métrica</span>
-        <span style="width:70px;text-align:right;">Anterior</span>
-        <span style="width:70px;text-align:right;">Actual</span>
-        <span style="width:56px;text-align:right;">Delta</span>
-      </div>
-      <div class="inbody-compare">
-        ${renderCompareRow('Peso (kg)', prevIb.peso_kg, ib.peso_kg, -1)}
-        ${renderCompareRow('Grasa %', prevIb.grasa_pct, ib.grasa_pct, -1)}
-        ${renderCompareRow('Músculo (kg)', prevIb.smm_kg, ib.smm_kg, 1)}
-        ${renderCompareRow('TMB kcal', prevIb.tmb_kcal, ib.tmb_kcal, 1)}
-      </div>
-    </div>
-    ` : `
-    <div class="chart-card">
-      <div class="chart-title">📊 Comparativa InBody</div>
-      <p style="font-size:13px;color:var(--muted);">Registra tu próximo InBody en Perfil para ver la comparativa.</p>
-    </div>
-    `}
-
-    <!-- Achievements / Logros -->
     ${renderAchievements(prog, numWeeks)}
 
-    <!-- Push Notifications -->
     <div class="push-card">
       <div class="push-card-title">🔔 Recordatorios</div>
       <div class="push-card-desc">Activa las notificaciones para recibir recordatorios automáticos.</div>
@@ -263,7 +291,6 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
       <button class="btn btn-secondary btn-full" id="btn-push">Activar recordatorios</button>
     </div>
 
-    <!-- Share Progress -->
     <div class="share-card">
       <div class="share-card-title">📤 Compartir progreso</div>
       <div class="share-card-desc">Genera una tarjeta con tu resumen semanal.</div>
@@ -271,30 +298,80 @@ function renderProgressView(el, { weightLog, profile, mealRows, numWeeks }) {
     </div>
   `;
 
-  // Draw charts + animate ring
   requestAnimationFrame(() => {
-    const ringFill = document.getElementById('daily-ring-fill');
+    const ringFill = subEl.querySelector('#daily-ring-fill');
     if (ringFill) {
       setTimeout(() => {
         ringFill.style.strokeDashoffset = RING_CIRC * (1 - daily.pct / 100);
       }, 80);
     }
     drawNutritionChart(days7, goals);
-    if (weightLog.length) drawWeightChart(weightLog, goals.peso_meta_kg);
-    bindProgressEvents(el, weightLog);
   });
+
+  subEl.querySelector('#btn-push')?.addEventListener('click', async () => {
+    if (!('Notification' in window)) { toastInfo('Este navegador no soporta notificaciones.'); return; }
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toastInfo('Permiso de notificaciones denegado.'); return; }
+    try {
+      const { subscribePush } = await import('../api.js');
+      await subscribePush();
+      toastInfo('✓ Recordatorios activados');
+      const btn = subEl.querySelector('#btn-push');
+      if (btn) { btn.textContent = '✓ Recordatorios activos'; btn.disabled = true; }
+    } catch (e) {
+      toastError('Error activando notificaciones: ' + e.message);
+    }
+  });
+
+  subEl.querySelector('#btn-share')?.addEventListener('click', () => {
+    let done = 0, fail = 0;
+    Object.values(prog).forEach(v => { if (v === 'done') done++; if (v === 'fail') fail++; });
+    const text = `💪 Mi semana en TRACKLIFE\n\n✅ Entrenos completados: ${done}\n❌ Fallados: ${fail}\n\n🏋️ Meta: bajar de ${INBODY.peso_kg}kg a ${GOALS.peso_meta_kg}kg\n\n#TRACKLIFE`;
+    if (navigator.share) {
+      navigator.share({ title: 'Mi semana — TRACKLIFE', text });
+    } else {
+      navigator.clipboard.writeText(text).then(() => toastInfo('✓ Copiado al portapapeles'));
+    }
+  });
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function calcDailyTasks(mealRows, weightLog, prog, numWeeks) {
+  const todayDs = dateStr(new Date());
+  const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const mealToday    = mealRows.some(r => r.date === todayDs && r.kcal > 0);
+  const weightRecent = weightLog.some(e => new Date(e.date + 'T00:00:00') >= oneWeekAgo);
+
+  let workoutToday = false;
+  outer: for (let w = 1; w <= numWeeks; w++) {
+    for (let d = 0; d < DAYS_PER_WEEK; d++) {
+      if (dateStr(getDateFor(w, d)) === todayDs) {
+        workoutToday = SUBS.some(s => prog[workoutKey(w, d, s)] === 'done');
+        break outer;
+      }
+    }
+  }
+
+  const tasks = [
+    { label: 'Comida registrada', icon: '🍽️', done: mealToday },
+    { label: 'Peso esta semana',  icon: '⚖️',  done: weightRecent },
+    { label: 'Entreno hoy',       icon: '🏋️', done: workoutToday },
+  ];
+  const done = tasks.filter(t => t.done).length;
+  return { tasks, done, total: tasks.length, pct: Math.round((done / tasks.length) * 100) };
 }
 
 function renderAchievements(prog, numWeeks) {
   const totalDone = Object.values(prog).filter(v => v === 'done').length;
-  const streak = computeStreak(prog, numWeeks);
+  const streak    = computeStreak(prog, numWeeks);
   const all = [
-    { icon: '🥇', title: 'Primer entreno',   desc: 'Completa tu primera sesión',      done: totalDone >= 1 },
-    { icon: '💪', title: '10 sesiones',        desc: 'Completa 10 sesiones en total',   done: totalDone >= 10 },
-    { icon: '🔥', title: '7 días seguidos',    desc: 'Racha de 7 días completados',     done: streak >= 7 },
-    { icon: '⚡', title: '14 días de racha',   desc: 'Racha de 14 días completados',    done: streak >= 14 },
-    { icon: '🏆', title: '25 sesiones',        desc: 'Completa 25 sesiones en total',   done: totalDone >= 25 },
-    { icon: '🌟', title: 'Plan completo',      desc: 'Termina las 4 semanas del plan',  done: totalDone >= 48 },
+    { icon: '🥇', title: 'Primer entreno',  desc: 'Completa tu primera sesión',     done: totalDone >= 1 },
+    { icon: '💪', title: '10 sesiones',      desc: 'Completa 10 sesiones en total',  done: totalDone >= 10 },
+    { icon: '🔥', title: '7 días seguidos',  desc: 'Racha de 7 días completados',    done: streak >= 7 },
+    { icon: '⚡', title: '14 días de racha', desc: 'Racha de 14 días completados',   done: streak >= 14 },
+    { icon: '🏆', title: '25 sesiones',      desc: 'Completa 25 sesiones en total',  done: totalDone >= 25 },
+    { icon: '🌟', title: 'Plan completo',    desc: 'Termina las 4 semanas del plan', done: totalDone >= 48 },
   ];
   return `
     <div class="chart-card">
@@ -313,9 +390,11 @@ function renderAchievements(prog, numWeeks) {
 }
 
 function renderCompareRow(label, oldVal, newVal, direction) {
+  if (oldVal == null || newVal == null) return '';
   const delta = (newVal - oldVal).toFixed(1);
-  const isGood = (direction > 0 && delta > 0) || (direction < 0 && delta < 0);
-  const cls = delta > 0 ? (direction > 0 ? 'pos' : 'neg') : (delta < 0 ? (direction < 0 ? 'pos' : 'neg') : '');
+  const cls = delta > 0
+    ? (direction > 0 ? 'pos' : 'neg')
+    : (delta < 0 ? (direction < 0 ? 'pos' : 'neg') : '');
   return `
     <div class="inbody-compare-row">
       <span class="inbody-compare-label">${label}</span>
@@ -333,14 +412,14 @@ function buildHeatmap(numWeeks, prog) {
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
       const date = getDateFor(w, d);
       const isPast = date < today;
-      const statuses = SUBS.map(s => prog[workoutKey(w, d, s)]);
+      const statuses  = SUBS.map(s => prog[workoutKey(w, d, s)]);
       const doneCount = statuses.filter(s => s === 'done').length;
       const failCount = statuses.filter(s => s === 'fail').length;
       let cls = '';
-      if (doneCount === 3) cls = 'done';
+      if (doneCount === 3)   cls = 'done';
       else if (failCount > 0) cls = 'fail';
       else if (doneCount > 0) cls = 'partial';
-      else if (!isPast) cls = 'future';
+      else if (!isPast)       cls = 'future';
       const label = `Sem ${w} · ${['Lun','Mar','Jue','Vie'][d]}`;
       cells += `<div class="heatmap-cell ${cls}" title="${label}"></div>`;
     }
@@ -414,8 +493,8 @@ function drawWeightChart(weightLog, targetKg) {
   if (!canvas || !window.Chart) return;
   if (_weightChart) { _weightChart.destroy(); _weightChart = null; }
 
-  const labels = weightLog.map(e => fmtDate(e.date));
-  const data = weightLog.map(e => e.weight_kg);
+  const labels     = weightLog.map(e => fmtDate(e.date));
+  const data       = weightLog.map(e => e.weight_kg);
   const targetLine = data.map(() => targetKg);
 
   _weightChart = new window.Chart(canvas, {
@@ -463,53 +542,5 @@ function drawWeightChart(weightLog, targetKg) {
         },
       },
     },
-  });
-}
-
-function bindProgressEvents(el, weightLog) {
-  // Log weight
-  el.querySelector('#btn-log-weight')?.addEventListener('click', async () => {
-    const input = el.querySelector('#weight-input');
-    const kg = parseFloat(input?.value);
-    if (!kg || kg < 40 || kg > 200) { toastInfo('Ingresa un peso válido (40-200 kg).'); return; }
-    try {
-      const today = dateStr(new Date());
-      const entry = await addWeightEntry(today, kg);
-      weightLog.push(entry);
-      set('weightLog', weightLog);
-      toastSaved();
-      await renderProgress();
-    } catch (e) {
-      toastError('Error guardando peso: ' + e.message);
-    }
-  });
-
-  // Push notifications
-  el.querySelector('#btn-push')?.addEventListener('click', async () => {
-    if (!('Notification' in window)) { toastInfo('Este navegador no soporta notificaciones.'); return; }
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') { toastInfo('Permiso de notificaciones denegado.'); return; }
-    try {
-      const { subscribePush } = await import('../api.js');
-      await subscribePush();
-      toastInfo('✓ Recordatorios activados');
-      el.querySelector('#btn-push').textContent = '✓ Recordatorios activos';
-      el.querySelector('#btn-push').disabled = true;
-    } catch (e) {
-      toastError('Error activando notificaciones: ' + e.message);
-    }
-  });
-
-  // Share
-  el.querySelector('#btn-share')?.addEventListener('click', () => {
-    const prog = state.workoutProgress;
-    let done = 0, fail = 0;
-    Object.values(prog).forEach(v => { if (v === 'done') done++; if (v === 'fail') fail++; });
-    const text = `💪 Mi semana en TRACKLIFE\n\n✅ Entrenos completados: ${done}\n❌ Fallados: ${fail}\n\n🏋️ Meta: bajar de ${INBODY.peso_kg}kg a ${GOALS.peso_meta_kg}kg y grasa de ${INBODY.grasa_pct}% a ${GOALS.grasa_meta_pct}%\n\n#TRACKLIFE #FitnessKosher`;
-    if (navigator.share) {
-      navigator.share({ title: 'Mi semana — TRACKLIFE', text });
-    } else {
-      navigator.clipboard.writeText(text).then(() => toastInfo('✓ Copiado al portapapeles'));
-    }
   });
 }

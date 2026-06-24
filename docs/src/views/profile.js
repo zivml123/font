@@ -389,11 +389,7 @@ function compressAvatar(file, maxSize) {
 }
 
 function syncDashAvatar(dataUrl) {
-  const img      = document.getElementById('dash-avatar-img');
-  const initials = document.getElementById('dash-avatar-initials');
-  if (img) {
-    img.src = dataUrl || 'assets/brand.webp';
-    img.classList.remove('hidden');
-  }
-  if (initials) initials.classList.add('hidden');
+  const src = dataUrl || 'assets/brand.webp';
+  const hoyImg = document.querySelector('#hoy-avatar-btn img');
+  if (hoyImg) hoyImg.src = src;
 }
