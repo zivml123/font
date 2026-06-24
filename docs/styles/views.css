@@ -52,9 +52,9 @@
 .daily-ring-eyebrow {
   font-family: 'Oswald', sans-serif;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
   margin-bottom: 14px;
 }
 .daily-ring-layout {
@@ -170,7 +170,7 @@
   font-family: 'Oswald', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--text);
 }
 
 /* ─── Profile View ───────────────────────────────────────── */
@@ -623,7 +623,7 @@
   font-family: 'Oswald', sans-serif;
   font-size: 15px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--text);
 }
 .photo-cmp-mid {
   display: flex;
@@ -670,8 +670,8 @@
   flex-wrap: wrap;
   gap: 6px;
   font-size: 12px;
-  color: var(--gold);
-  font-weight: 600;
+  color: var(--muted);
+  font-weight: 500;
   margin-bottom: 3px;
 }
 .photo-timeline-notes {

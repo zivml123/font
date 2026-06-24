@@ -109,7 +109,7 @@ function renderMedidas(subEl, { weightLog, profile }) {
       <div style="margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
           <span style="font-size:13px;color:var(--muted);">Actual</span>
-          <span style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--gold)">${latestWeight} kg</span>
+          <span style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--text)">${latestWeight} kg</span>
         </div>
         <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:10px;">
           <span>Inicio: <strong style="color:var(--text)">${startWeight} kg</strong></span>
@@ -119,7 +119,7 @@ function renderMedidas(subEl, { weightLog, profile }) {
           </span>
         </div>
         <div class="progress-track" style="height:8px;">
-          <div class="progress-fill" style="background:var(--gold);width:${progressPct.toFixed(1)}%;height:100%;"></div>
+          <div class="progress-fill" style="background:var(--muted);width:${progressPct.toFixed(1)}%;height:100%;"></div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${progressPct.toFixed(0)}% hacia la meta</div>
       </div>
@@ -248,11 +248,11 @@ function renderGraficas(subEl, { weightLog, profile, mealRows, numWeeks, workout
         <div class="summary-lbl">Prom kcal/día</div>
       </div>
       <div class="summary-item">
-        <span class="summary-val" style="color:var(--gold)">${avgProt}g</span>
+        <span class="summary-val" style="color:var(--text)">${avgProt}g</span>
         <div class="summary-lbl">Prom prot/día</div>
       </div>
       <div class="summary-item">
-        <span class="summary-val" style="color:var(--done)">${daysLogged}/7</span>
+        <span class="summary-val" style="color:var(--text)">${daysLogged}/7</span>
         <div class="summary-lbl">Días logueados</div>
       </div>
     </div>
@@ -270,7 +270,7 @@ function renderGraficas(subEl, { weightLog, profile, mealRows, numWeeks, workout
         <span style="font-size:11px;color:var(--muted);">
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--done);margin-right:3px;vertical-align:middle;"></span>Hecho
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--fail);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Fallado
-          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Parcial
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--muted);margin-right:3px;margin-left:8px;vertical-align:middle;"></span>Parcial
         </span>
       </div>
       <div class="heatmap-grid" style="grid-template-columns:repeat(${numWeeks * 4},1fr);">

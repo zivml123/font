@@ -69,7 +69,7 @@ export async function renderProfile() {
           <span class="profile-stat-lbl">Racha</span>
         </div>
         <div class="profile-stat-item">
-          <span class="profile-stat-val" style="color:var(--gold)">${numWeeks * DAYS_PER_WEEK * SUBS.length}</span>
+          <span class="profile-stat-val" style="color:var(--text)">${numWeeks * DAYS_PER_WEEK * SUBS.length}</span>
           <span class="profile-stat-lbl">Total sesiones</span>
         </div>
       </div>

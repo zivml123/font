@@ -180,7 +180,7 @@ async function renderHoy() {
       <div class="hoy-header">
         <div>
           <div class="hoy-brand">TRACKLIFE</div>
-          <div class="hoy-greeting">Hola, ${escHtml(nombre)}</div>
+          <div class="hoy-date">${dateLabel}</div>
         </div>
         <button class="hoy-avatar-btn" id="hoy-avatar-btn" aria-label="Perfil">
           <img src="${escAttr(avatarSrc)}" alt="" class="hoy-avatar-img" draggable="false">
@@ -189,7 +189,6 @@ async function renderHoy() {
 
       <div class="hoy-date-section">
         <div class="hoy-big-title">HOY</div>
-        <div class="hoy-date">${dateLabel}</div>
       </div>
 
       <div class="hoy-ring-section">
@@ -204,17 +203,7 @@ async function renderHoy() {
             <span class="hoy-ring-lbl">kcal</span>
           </div>
         </div>
-        <div class="hoy-ring-meta">
-          <div class="hoy-ring-goal">Meta: ${kcalGoal.toLocaleString()} kcal</div>
-          <div class="hoy-ring-remaining">${kcalRemain > 0 ? `${kcalRemain.toLocaleString()} restantes` : '¡Meta alcanzada!'}</div>
-          <div class="hoy-prot-bar-header">
-            <span>Proteína</span>
-            <span>${prot}g / ${protGoal}g</span>
-          </div>
-          <div style="height:4px;background:var(--panel2);border-radius:2px;overflow:hidden;margin-top:6px;">
-            <div style="height:100%;width:${protPct}%;background:var(--gold);border-radius:2px;transition:width 0.6s;"></div>
-          </div>
-        </div>
+        <div class="hoy-ring-sub">${kcalRemain > 0 ? `${kcalRemain.toLocaleString()} kcal restantes` : 'Meta alcanzada'}</div>
       </div>
 
       <div class="hoy-stats-list">
@@ -234,7 +223,7 @@ async function renderHoy() {
 
       <div class="hoy-actions">
         <button class="btn btn-primary btn-full" id="hoy-btn-food">+ Registrar comida</button>
-        <button class="btn btn-secondary btn-full" id="hoy-btn-workout">✓ Ver entrenamiento</button>
+        <button class="btn btn-secondary btn-full" id="hoy-btn-workout">Ver entrenamiento</button>
       </div>
     </div>
   `;
