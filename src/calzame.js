@@ -340,7 +340,7 @@ function pais_form_html(p = {}) {
   <div class="form-row">
     <div class="form-group">
       <label>País *</label>
-      <select id="fp-nombre" onchange="document.getElementById('fp-bandera').value=window.BANDERAS[this.value]||''">
+      <select id="fp-nombre" onchange="document.getElementById('fp-bandera').value=BANDERAS[this.value]||''">
         <option value="">Seleccionar...</option>
         ${Object.keys(BANDERAS).map(n=>`<option value="${n}" ${p.nombre===n?'selected':''}>${BANDERAS[n]} ${n}</option>`).join('')}
         <option value="Otro" ${p.nombre==='Otro'?'selected':''}>Otro</option>
@@ -522,7 +522,7 @@ function openPaisDetail(id) {
 function switchPaisTab(ev, panelId) {
   ev.target.closest('.modal-tabs').querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
   ev.target.classList.add('active');
-  document.querySelectorAll('.modal-tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('modal-pais-detail-body').querySelectorAll('.modal-tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(panelId)?.classList.add('active');
 }
 
@@ -1018,7 +1018,6 @@ function deleteSeguimientoEmpresa(segId, empresaId) {
 // ─────────────────────────────────────────────────────────────────────────────
 Router.register('prospectos', (params = {}) => {
   const all = DB.getProspectos();
-  const paises = DB.getPaises();
   return `
 <div class="page-header">
   <div><h2>Prospectos</h2><p>${all.length} en pipeline</p></div>
@@ -1207,7 +1206,7 @@ function openDetailProspecto(id) {
     <strong>Seguimientos (${segs.length})</strong>
     <button class="btn btn-primary btn-sm" onclick="Modal.close('modal-detail');openAddSeguimiento('${p.id}')">+ Agregar</button>
   </div>
-  ${segs.sort((a,b)=>new Date(b.fechaAgenda)-new Date(a.fechaAgenda)).map(s=>`
+  ${[...segs].sort((a,b)=>new Date(b.fechaAgenda)-new Date(a.fechaAgenda)).map(s=>`
   <div class="seg-card ${s.completado?'completed':''}">
     <div class="seg-check" onclick="toggleSeguimiento('${s.id}')"></div>
     <div class="seg-body"><div class="seg-title">${tipoIcon(s.tipo)} ${cap(s.tipo)} · ${fmtDate(s.fechaAgenda)}</div>${s.notas?`<div class="seg-meta">${escHtml(s.notas)}</div>`:''}</div>
