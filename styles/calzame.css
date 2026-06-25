@@ -563,3 +563,235 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 
 /* ── CONFIRM DIALOG ───────────────────────────────── */
 .confirm-msg { font-size: 14px; color: var(--gray-700); line-height: 1.6; }
+
+/* ── COUNTRY CARDS (MAPA COMERCIAL) ──────────────── */
+.countries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.country-card {
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: box-shadow var(--transition), border-color var(--transition);
+  cursor: pointer;
+}
+.country-card:hover { box-shadow: var(--shadow-md); border-color: var(--gray-300); }
+.country-card .cc-top {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--gray-50);
+}
+.country-card .cc-flag { font-size: 28px; line-height: 1; margin-bottom: 8px; }
+.country-card .cc-name { font-size: 16px; font-weight: 700; color: var(--black); }
+.country-card .cc-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.country-card .cc-body { padding: 12px 18px; }
+.country-card .cc-markets { font-size: 12px; color: var(--gray-500); margin-bottom: 8px; line-height: 1.5; }
+.country-card .cc-markets strong { color: var(--gray-700); }
+.country-card .cc-restriction {
+  font-size: 11px;
+  color: var(--gray-400);
+  background: var(--gray-50);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+.country-card .cc-bottom {
+  padding: 10px 18px;
+  border-top: 1px solid var(--gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray-50);
+}
+.country-card .cc-stat { font-size: 12px; color: var(--gray-500); }
+.country-card .cc-stat strong { color: var(--black); font-size: 14px; }
+
+/* oportunidad colors */
+.oportunidad-strip { height: 4px; width: 100%; }
+.op-muy_alta .oportunidad-strip { background: #10b981; }
+.op-alta .oportunidad-strip { background: #3b82f6; }
+.op-media .oportunidad-strip { background: #f59e0b; }
+.op-baja .oportunidad-strip { background: #9ca3af; }
+.op-bloqueada .oportunidad-strip { background: #ef4444; }
+
+.badge-op-muy_alta { background: #d1fae5; color: #065f46; }
+.badge-op-alta { background: #dbeafe; color: #1e40af; }
+.badge-op-media { background: #fef3c7; color: #92400e; }
+.badge-op-baja { background: #f3f4f6; color: #6b7280; }
+.badge-op-bloqueada { background: #fee2e2; color: #991b1b; }
+
+.badge-dif-fácil { background: #d1fae5; color: #065f46; }
+.badge-dif-moderada { background: #fef3c7; color: #92400e; }
+.badge-dif-difícil { background: #fee2e2; color: #991b1b; }
+.badge-dif-muy_difícil { background: #7f1d1d; color: #fca5a5; }
+
+/* ── EMPRESA CARDS / TABLE ────────────────────────── */
+.empresa-stage-identificada { background: #f3f4f6; color: #6b7280; }
+.empresa-stage-investigando { background: #dbeafe; color: #1e40af; }
+.empresa-stage-contactada { background: #fef3c7; color: #92400e; }
+.empresa-stage-en_negociacion { background: #ede9fe; color: #5b21b6; }
+.empresa-stage-ganada { background: #d1fae5; color: #065f46; }
+.empresa-stage-descartada { background: #fee2e2; color: #991b1b; }
+
+.pot-muy_alto { background: #064e3b; color: white; }
+.pot-alto { background: #1e40af; color: white; }
+.pot-medio { background: #78350f; color: white; }
+.pot-bajo { background: #6b7280; color: white; }
+
+/* ── ESTRATEGIA ───────────────────────────────────── */
+.estrategia-grid { display: grid; gap: 16px; }
+.estrategia-q {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.estrategia-q .eq-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-500);
+  margin-bottom: 6px;
+}
+.estrategia-q .eq-value { font-size: 14px; color: var(--black); line-height: 1.5; }
+.estrategia-q .eq-empty { font-size: 13px; color: var(--gray-300); font-style: italic; }
+
+/* ── MODAL TABS ───────────────────────────────────── */
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--gray-100);
+  padding: 0 24px;
+  background: var(--white);
+  flex-shrink: 0;
+}
+.modal-tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-400);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--transition);
+}
+.modal-tab:hover { color: var(--black); }
+.modal-tab.active { color: var(--black); border-bottom-color: var(--black); }
+.modal-tab-panel { display: none; }
+.modal-tab-panel.active { display: block; }
+
+/* ── CONTACTO CARD ────────────────────────────────── */
+.contacto-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--white);
+}
+.contacto-card .co-info { flex: 1; min-width: 0; }
+.contacto-card .co-name { font-weight: 600; font-size: 14px; }
+.contacto-card .co-cargo { font-size: 12px; color: var(--gray-400); }
+.contacto-card .co-contact { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+
+/* ── MAP STATS ROW ────────────────────────────────── */
+.map-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 16px;
+}
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+.map-legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+
+/* ── INTEL SECTION ────────────────────────────────── */
+.intel-section { margin-bottom: 20px; }
+.intel-section h4 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gray-400);
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.intel-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.intel-tag {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--gray-700);
+}
+.restriction-box {
+  background: #fff8f0;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+.restriction-box .rb-row { display: flex; gap: 8px; margin-bottom: 4px; }
+.restriction-box .rb-row:last-child { margin-bottom: 0; }
+.restriction-box .rb-label { font-weight: 600; color: var(--gray-600); min-width: 80px; }
+
+/* ── HIGHLIGHT NOTE ───────────────────────────────── */
+.highlight-note {
+  background: #f0f9ff;
+  border-left: 3px solid #3b82f6;
+  padding: 12px 14px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+/* ── EMPRESA DETAIL HEADER ────────────────────────── */
+.empresa-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--gray-100);
+  flex-shrink: 0;
+}
+.empresa-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--black);
+  color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.empresa-detail-header .eh-name { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.empresa-detail-header .eh-sub { font-size: 13px; color: var(--gray-400); margin-top: 3px; }
+.empresa-detail-header .eh-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ── MINI TABLE ───────────────────────────────────── */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mini-table td { padding: 8px 10px; border-bottom: 1px solid var(--gray-50); }
+.mini-table td:first-child { color: var(--gray-500); font-weight: 500; width: 140px; }
+.mini-table td:last-child { color: var(--black); font-weight: 500; }
+.mini-table tr:last-child td { border-bottom: none; }
+

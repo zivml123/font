@@ -7,18 +7,25 @@
   <link rel="stylesheet" href="styles/calzame.css">
 </head>
 <body>
-
 <div id="app">
 
-  <!-- ── SIDEBAR ──────────────────────────────────────────────────────────── -->
+  <!-- ── SIDEBAR ──────────────────────────────────────────────────────── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="brand">Calzame <span>AI</span></div>
-      <div class="version">v1 · Zona Libre, Panamá</div>
+      <div class="version">v2 · Zona Libre, Panamá</div>
     </div>
-
     <nav class="sidebar-nav">
-      <div class="nav-section-label">Principal</div>
+      <div class="nav-section-label">Cazar Clientes</div>
+      <button class="nav-item" data-view="mapa">
+        <span class="nav-icon">🗺</span> Mapa Comercial
+      </button>
+      <button class="nav-item" data-view="empresas">
+        <span class="nav-icon">🏢</span> Empresas Objetivo
+        <span class="nav-badge" id="badge-empresas" style="display:none">0</span>
+      </button>
+
+      <div class="nav-section-label">Convertir</div>
       <button class="nav-item" data-view="dashboard">
         <span class="nav-icon">📊</span> Dashboard
       </button>
@@ -38,35 +45,205 @@
         <span class="nav-icon">📂</span> Importar / Exportar
       </button>
     </nav>
-
     <div class="sidebar-footer">
       <div style="font-size:11px;color:var(--gray-600);line-height:1.6">
-        Solo ventas mayoristas<br>
-        Pedido mínimo US$5,000
+        Solo mayoristas · Mínimo US$5,000<br>
+        Zona Libre de Colón, Panamá
       </div>
     </div>
   </aside>
 
-  <!-- ── MAIN ─────────────────────────────────────────────────────────────── -->
+  <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
   <main class="main">
     <header class="topbar">
       <span class="topbar-title">Dashboard</span>
       <div class="topbar-actions">
-        <button class="btn btn-primary btn-sm" onclick="openAddProspecto()">+ Agregar Prospecto</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddProspecto()">+ Prospecto</button>
       </div>
     </header>
-
     <div class="content">
-      <div id="view-content"><!-- rendered by router --></div>
+      <div id="view-content"></div>
     </div>
   </main>
-
 </div>
 
-<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
+<!-- ── TOAST ────────────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<!-- ── MODAL: PROSPECTO ───────────────────────────────────────────────────── -->
+<!-- ── MODAL: CONFIRMAR ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar</span>
+      <button class="modal-close" onclick="Modal.close('modal-confirm')">×</button>
+    </div>
+    <div class="modal-body"><p class="confirm-msg" id="confirm-msg"></p></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: PAÍS FORM ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-pais">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-pais-title">Agregar País</span>
+      <button class="modal-close" onclick="Modal.close('modal-pais')">×</button>
+    </div>
+    <div class="modal-body" id="modal-pais-body"></div>
+    <div class="modal-footer">
+      <input type="hidden" id="modal-pais-id">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-pais')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePais()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: PAÍS DETAIL ────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-pais-detail">
+  <div class="modal modal-lg" style="max-height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="flex-shrink:0">
+      <span class="modal-title">Inteligencia Comercial</span>
+      <button class="modal-close" onclick="Modal.close('modal-pais-detail')">×</button>
+    </div>
+    <div id="modal-pais-detail-body" style="display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
+  </div>
+</div>
+
+<!-- ── MODAL: EMPRESA FORM ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-empresa">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-empresa-title">Agregar Empresa Objetivo</span>
+      <button class="modal-close" onclick="Modal.close('modal-empresa')">×</button>
+    </div>
+    <div class="modal-body" id="modal-empresa-body"></div>
+    <div class="modal-footer">
+      <input type="hidden" id="modal-empresa-id">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-empresa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEmpresa()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: EMPRESA DETAIL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-empresa-detail">
+  <div class="modal modal-lg" style="max-height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="flex-shrink:0">
+      <span class="modal-title">Empresa Objetivo</span>
+      <button class="modal-close" onclick="Modal.close('modal-empresa-detail')">×</button>
+    </div>
+    <div id="modal-empresa-detail-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
+  </div>
+</div>
+
+<!-- ── MODAL: ESTRATEGIA ─────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-estrategia">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-estrategia-title">Estrategia de Entrada</span>
+      <button class="modal-close" onclick="Modal.close('modal-estrategia')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modal-estrategia-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Quién toma la decisión de compra?</label>
+          <input type="text" id="fes-tomador" placeholder="Nombre del tomador de decisión">
+        </div>
+        <div class="form-group">
+          <label>Cargo / Título</label>
+          <input type="text" id="fes-cargo" placeholder="Director Comercial, Gerente de Compras...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>¿Cómo podemos llegar a esa persona?</label>
+        <textarea id="fes-como" rows="2" placeholder="LinkedIn, feria de calzado, llamada directa, referido..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>¿Tenemos algún contacto en común?</label>
+        <textarea id="fes-contacto" rows="2" placeholder="Referencias compartidas, clientes que los conocen..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>¿Quién ya habló con ellos? ¿Cuándo y qué pasó?</label>
+        <textarea id="fes-quien" rows="2" placeholder="Nombre del vendedor, fecha, resultado..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>¿Qué falta para convertirlos en clientes?</label>
+        <textarea id="fes-falta" rows="3" placeholder="Obstáculos, condiciones que piden, precio que necesitan..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Próximo paso concreto</label>
+        <textarea id="fes-proximo" rows="2" placeholder="Acción específica + responsable + fecha límite"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-estrategia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEstrategia()">Guardar Estrategia</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: CONTACTO EMPRESA ───────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-contacto">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Agregar Contacto</span>
+      <button class="modal-close" onclick="Modal.close('modal-contacto')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modal-contacto-empresa-id">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="fco-nombre" placeholder="María González"></div>
+      <div class="form-group"><label>Cargo</label><input type="text" id="fco-cargo" placeholder="Gerente de Compras"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="fco-telefono" placeholder="+505 8888 0000"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="fco-email" placeholder="maria@empresa.com"></div>
+      </div>
+      <label class="checkbox-wrap">
+        <input type="checkbox" id="fco-decision">
+        <span>Es el tomador de decisión de compra</span>
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-contacto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveContactoEmpresa()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: SEGUIMIENTO EMPRESA ───────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-seg-empresa">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-seg-empresa-title">Agregar Seguimiento</span>
+      <button class="modal-close" onclick="Modal.close('modal-seg-empresa')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modal-seg-empresa-id">
+      <div class="form-row">
+        <div class="form-group"><label>Tipo</label>
+          <select id="fse-tipo">
+            <option value="llamada">📞 Llamada</option>
+            <option value="whatsapp">💬 WhatsApp</option>
+            <option value="email">✉️ Email</option>
+            <option value="reunión">🤝 Reunión</option>
+            <option value="visita">🚶 Visita</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fecha</label><input type="date" id="fse-fecha"></div>
+      </div>
+      <div class="form-group"><label>Notas / Objetivo</label><textarea id="fse-notas" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-seg-empresa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSeguimientoEmpresa()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: PROSPECTO ──────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="modal-prospecto">
   <div class="modal">
     <div class="modal-header">
@@ -82,7 +259,7 @@
   </div>
 </div>
 
-<!-- ── MODAL: DETALLE PROSPECTO ──────────────────────────────────────────── -->
+<!-- ── MODAL: DETALLE PROSPECTO ─────────────────────────────────────────── -->
 <div class="modal-overlay" id="modal-detail">
   <div class="modal modal-lg">
     <div class="modal-header">
@@ -93,7 +270,7 @@
   </div>
 </div>
 
-<!-- ── MODAL: SEGUIMIENTO ─────────────────────────────────────────────────── -->
+<!-- ── MODAL: SEGUIMIENTO PROSPECTO ────────────────────────────────────── -->
 <div class="modal-overlay" id="modal-seguimiento">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -109,7 +286,7 @@
   </div>
 </div>
 
-<!-- ── MODAL: PLANTILLA ───────────────────────────────────────────────────── -->
+<!-- ── MODAL: PLANTILLA ──────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="modal-plantilla">
   <div class="modal">
     <div class="modal-header">
@@ -121,23 +298,6 @@
       <input type="hidden" id="modal-tpl-id">
       <button class="btn btn-secondary" onclick="Modal.close('modal-plantilla')">Cancelar</button>
       <button class="btn btn-primary" onclick="savePlantilla()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL: CONFIRMAR ───────────────────────────────────────────────────── -->
-<div class="modal-overlay" id="modal-confirm">
-  <div class="modal modal-sm">
-    <div class="modal-header">
-      <span class="modal-title">Confirmar acción</span>
-      <button class="modal-close" onclick="Modal.close('modal-confirm')">×</button>
-    </div>
-    <div class="modal-body">
-      <p class="confirm-msg" id="confirm-msg"></p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="Modal.close('modal-confirm')">Cancelar</button>
-      <button class="btn btn-danger" id="confirm-ok">Eliminar</button>
     </div>
   </div>
 </div>
