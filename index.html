@@ -2,132 +2,146 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#121212">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ziv Plan">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="description" content="Tu plan de fitness personal — Ziv Mendelson">
-
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
-
-  <!-- Chart.js for progress charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <link rel="stylesheet" href="/styles/base.css">
-  <link rel="stylesheet" href="/styles/components.css">
-  <link rel="stylesheet" href="/styles/views.css">
-
-  <title>Ziv Plan — Fitness Personal</title>
-
-  <!-- Supabase config injected from server (set via env vars) -->
-  <script>
-    window.__SUPABASE_URL = '';  // Injected by server if configured
-    window.__SUPABASE_KEY = '';  // Injected by server if configured
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calzame AI — Zona Libre de Colón</title>
+  <link rel="stylesheet" href="styles/calzame.css">
 </head>
 <body>
 
-<!-- ─── Loading Screen ──────────────────────────────────────── -->
-<div id="loading-screen">
-  <div class="loading-logo">ZIV PLAN</div>
-  <div class="loading-spinner"></div>
+<div id="app">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">Calzame <span>AI</span></div>
+      <div class="version">v1 · Zona Libre, Panamá</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <button class="nav-item" data-view="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="prospectos">
+        <span class="nav-icon">👥</span> Prospectos
+      </button>
+      <button class="nav-item" data-view="seguimientos">
+        <span class="nav-icon">📅</span> Seguimientos
+        <span class="nav-badge" id="badge-seguimientos" style="display:none">0</span>
+      </button>
+
+      <div class="nav-section-label">Herramientas</div>
+      <button class="nav-item" data-view="plantillas">
+        <span class="nav-icon">📝</span> Plantillas
+      </button>
+      <button class="nav-item" data-view="importar">
+        <span class="nav-icon">📂</span> Importar / Exportar
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div style="font-size:11px;color:var(--gray-600);line-height:1.6">
+        Solo ventas mayoristas<br>
+        Pedido mínimo US$5,000
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <header class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddProspecto()">+ Agregar Prospecto</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div id="view-content"><!-- rendered by router --></div>
+    </div>
+  </main>
+
 </div>
 
-<!-- ─── Auth Screen (Supabase only) ────────────────────────── -->
-<div id="auth-screen" class="auth-screen hidden"></div>
-
-<!-- ─── Toast Container ────────────────────────────────────── -->
+<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<!-- ─── Main App ────────────────────────────────────────────── -->
-<div id="main-app">
-
-  <!-- ─── Tab Bar ───────────────────────────────────────────── -->
-  <nav id="tab-bar" role="navigation" aria-label="Navegación principal">
-    <button class="tab-btn active" data-tab="workout" aria-label="Entrenamiento">
-      <span class="tab-icon">🏋️</span>
-      ENTRENO
-    </button>
-    <button class="tab-btn" data-tab="food" aria-label="Comida">
-      <span class="tab-icon">🍽️</span>
-      COMIDA
-    </button>
-    <button class="tab-btn" data-tab="progress" aria-label="Progreso">
-      <span class="tab-icon">📈</span>
-      PROGRESO
-    </button>
-    <button class="tab-btn" data-tab="profile" aria-label="Perfil">
-      <span class="tab-icon">👤</span>
-      PERFIL
-    </button>
-  </nav>
-
-  <!-- ─── Error Banner ──────────────────────────────────────── -->
-  <div id="error-banner" class="hidden" role="alert">
-    <span>Error</span>
-    <button aria-label="Cerrar error">✕</button>
+<!-- ── MODAL: PROSPECTO ───────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-prospecto">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-prospecto-title">Agregar Prospecto</span>
+      <button class="modal-close" onclick="Modal.close('modal-prospecto')">×</button>
+    </div>
+    <div class="modal-body" id="modal-prospecto-body"></div>
+    <div class="modal-footer">
+      <input type="hidden" id="modal-prospecto-id">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-prospecto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProspecto()">Guardar</button>
+    </div>
   </div>
-
-  <!-- ─── App Content ───────────────────────────────────────── -->
-  <main id="app">
-
-    <!-- HERO BANNER -->
-    <div class="hero">
-      <img class="hero-img" src="/assets/cover.jpg" alt="" onerror="this.style.display='none'">
-      <div class="hero-gradient"></div>
-      <div class="hero-no-img">
-        <div class="hero-no-img-text">
-          ZIV — TU MEJOR VERSIÓN<br>
-          "MAÑANA EMPIEZO EL PLAN"<br>
-          HOY ES DÍA DE CARGA<br>
-          SIN CULPA (mentira)<br>
-          CARGANDO DISCIPLINA...
-        </div>
-      </div>
-      <div class="hero-content">
-        <p class="hero-eyebrow">ZIV MENDELSON · 21 años</p>
-        <h1 class="hero-title">Plan Fitness</h1>
-        <div class="hero-sub">
-          <span>79.8 → 74.8 kg</span>
-          <span>18.7% → 15% grasa</span>
-          <span>175g proteína/día</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- WORKOUT VIEW -->
-    <div id="workout-view" class="view active" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando entrenos...</div>
-    </div>
-
-    <!-- FOOD VIEW -->
-    <div id="food-view" class="view" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando comidas...</div>
-    </div>
-
-    <!-- PROGRESS VIEW -->
-    <div id="progress-view" class="view" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando progreso...</div>
-    </div>
-
-    <!-- PROFILE VIEW -->
-    <div id="profile-view" class="view" role="tabpanel">
-      <div style="padding:40px;text-align:center;color:var(--muted);">Cargando perfil...</div>
-    </div>
-
-  </main>
 </div>
 
-<script type="module" src="/src/main.js"></script>
+<!-- ── MODAL: DETALLE PROSPECTO ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">Detalle del Prospecto</span>
+      <button class="modal-close" onclick="Modal.close('modal-detail')">×</button>
+    </div>
+    <div class="modal-body" id="modal-detail-body"></div>
+  </div>
+</div>
+
+<!-- ── MODAL: SEGUIMIENTO ─────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-seguimiento">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-seg-title">Agregar Seguimiento</span>
+      <button class="modal-close" onclick="Modal.close('modal-seguimiento')">×</button>
+    </div>
+    <div class="modal-body" id="modal-seg-body"></div>
+    <div class="modal-footer">
+      <input type="hidden" id="modal-seg-id">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-seguimiento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSeguimiento()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: PLANTILLA ───────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-plantilla">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-tpl-title">Nueva Plantilla</span>
+      <button class="modal-close" onclick="Modal.close('modal-plantilla')">×</button>
+    </div>
+    <div class="modal-body" id="modal-tpl-body"></div>
+    <div class="modal-footer">
+      <input type="hidden" id="modal-tpl-id">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-plantilla')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePlantilla()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: CONFIRMAR ───────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar acción</span>
+      <button class="modal-close" onclick="Modal.close('modal-confirm')">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-msg" id="confirm-msg"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script src="src/calzame.js"></script>
 </body>
 </html>
