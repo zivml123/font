@@ -1,11 +1,12 @@
-import { state, set } from './state.js';
+import { state, set, DEFAULT_SETTINGS } from './state.js';
 import { renderWorkout } from './views/workout.js';
 import { renderFood } from './views/food.js';
 import { renderProgress } from './views/progress.js';
 import { renderProfile } from './views/profile.js';
-import { renderAuth, hideAuth } from './views/auth.js';
+import { renderAuth, showAuth, hideAuth } from './views/auth.js';
+import { applyStoredTheme } from './views/settings.js';
 import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS } from './workoutData.js';
-import { getNumWeeks } from './storage.js';
+import { getNumWeeks, getSettings } from './storage.js';
 
 const TAB_VIEW_MAP = {
   hoy:      'hoy',
@@ -29,7 +30,9 @@ const HOY_CIRC  = 282.74; // 2π × 45
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
+  applyStoredTheme();
   await initSupabase();
+  await initSettings();
   initTabs();
   initErrorBanner();
   registerServiceWorker();
@@ -39,11 +42,22 @@ async function init() {
   await switchTab(state.tab);
 }
 
+async function initSettings() {
+  try {
+    const s = await getSettings();
+    set('settings', { ...DEFAULT_SETTINGS, ...s });
+  } catch { /* use defaults */ }
+}
+
 // ─── Supabase ─────────────────────────────────────────────────────────────────
 async function initSupabase() {
-  const supabaseUrl = window.__SUPABASE_URL;
-  const supabaseKey = window.__SUPABASE_KEY;
+  // URL/key can be set via Settings (localStorage) or hardcoded in index.html
+  const supabaseUrl = localStorage.getItem('zivplan_supabase_url') || window.__SUPABASE_URL || '';
+  const supabaseKey = localStorage.getItem('zivplan_supabase_key') || window.__SUPABASE_KEY || '';
   if (!supabaseUrl || !supabaseKey) return;
+
+  // Expose showAuth for settings.js logout/login flow
+  window.__authModule = { showAuth };
 
   try {
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');

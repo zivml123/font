@@ -5,6 +5,7 @@ import { toastSaved, toastError, toastInfo } from '../components/toast.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { getBackendUrl, setBackendUrl } from '../api.js';
 import { computeStreak, DAYS_PER_WEEK, SUBS } from '../workoutData.js';
+import { renderSettings } from './settings.js';
 
 export async function renderProfile() {
   const el = document.getElementById('profile-view');
@@ -52,10 +53,11 @@ export async function renderProfile() {
         </div>
         <div class="profile-header-info">
           <div class="profile-name">${escHtml(nombre)}</div>
-          <div class="profile-meta">21 años · 171.9 cm · Kosher</div>
-          ${state.user ? `<div class="profile-meta" style="margin-top:4px;font-size:11px;">${escHtml(state.user.email)}</div>` : '<div class="profile-meta" style="margin-top:4px;font-size:11px;color:var(--muted);">Modo local · sin cuenta</div>'}
-          <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Restaurar imagen por defecto</button>
+          ${p.username ? `<div class="profile-meta" style="font-size:11px;color:var(--muted);">@${escHtml(p.username)}</div>` : ''}
+          ${state.user ? `<div class="profile-meta" style="margin-top:2px;font-size:11px;">${escHtml(state.user.email)}</div>` : '<div class="profile-meta" style="margin-top:2px;font-size:11px;color:var(--muted);">Modo local · sin cuenta</div>'}
+          <button class="btn-text-sm" id="btn-remove-photo" style="${avatarDataUrl ? '' : 'display:none'}">Restaurar imagen</button>
         </div>
+        <button class="profile-settings-btn" id="btn-open-settings" aria-label="Ajustes">⚙</button>
       </div>
 
       <!-- Stats Row -->
@@ -337,12 +339,18 @@ function bindProfileEvents(el) {
     });
   });
 
+  // Open settings
+  el.querySelector('#btn-open-settings')?.addEventListener('click', () => {
+    renderSettings(el, renderProfile);
+  });
+
   // Logout
   el.querySelector('#btn-logout')?.addEventListener('click', async () => {
     if (window.__supabase) {
       await window.__supabase.auth.signOut();
       set('user', null);
-      await renderProfile();
+      set('profile', null);
+      location.reload();
     }
   });
 
