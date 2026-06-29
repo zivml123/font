@@ -83,8 +83,8 @@ function renderProgressSubTab(subEl, sub, data) {
 }
 
 // ─── Fotos ────────────────────────────────────────────────────────────────────
-function renderFotos(subEl) {
-  renderPhotosInElement(subEl);
+async function renderFotos(subEl) {
+  await renderPhotosInElement(subEl);
 }
 
 // ─── Medidas ──────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { renderProgress } from './views/progress.js';
 import { renderProfile } from './views/profile.js';
 import { renderAuth, showAuth, hideAuth } from './views/auth.js';
 import { applyStoredTheme } from './views/settings.js';
+import { renderOnboarding } from './views/onboarding.js';
 import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS } from './workoutData.js';
 import { getNumWeeks, getSettings } from './storage.js';
 
@@ -265,89 +266,7 @@ window.__refreshDashPills  = () => { if (state.tab === 'hoy') renderHoy(); };
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 function checkOnboarding() {
-  if (localStorage.getItem('zivplan_profile')) return;
-  showOnboarding();
-}
-
-function showOnboarding() {
-  const steps = [
-    { key: 'peso_actual', label: 'Tu peso actual (kg)', placeholder: '80', type: 'number', unit: 'kg', min: 30, max: 300, step: 0.1 },
-    { key: 'peso_meta',   label: 'Tu peso objetivo (kg)', placeholder: '72', type: 'number', unit: 'kg', min: 30, max: 300, step: 0.1 },
-    { key: 'edad',        label: 'Tu edad', placeholder: '25', type: 'number', unit: 'años', min: 14, max: 80, step: 1 },
-    { key: 'dias_semana', label: 'Días de entreno / semana', placeholder: '4', type: 'number', unit: 'días/sem', min: 1, max: 7, step: 1 },
-    { key: 'objetivo',    label: 'Tu objetivo principal', type: 'select', options: ['Bajar grasa', 'Ganar músculo', 'Recomposición corporal'] },
-  ];
-  let current = 0;
-  const answers = {};
-
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;';
-
-  function renderStep() {
-    const s = steps[current];
-    const isLast = current === steps.length - 1;
-
-    if (s.type === 'select') {
-      overlay.innerHTML = `
-        <div style="width:100%;max-width:360px;">
-          <div style="font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--muted);margin-bottom:24px;">CONFIGURACIÓN ${current + 1} / ${steps.length}</div>
-          <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:32px;line-height:1.2;">${s.label}</div>
-          ${s.options.map(o => `<button class="btn btn-secondary ob-opt" data-val="${o}" style="width:100%;text-align:left;justify-content:flex-start;font-size:15px;padding:14px 18px;margin-bottom:10px;">${o}</button>`).join('')}
-        </div>
-      `;
-      overlay.querySelectorAll('.ob-opt').forEach(btn => {
-        btn.addEventListener('click', () => { answers[s.key] = btn.dataset.val; advance(); });
-      });
-    } else {
-      overlay.innerHTML = `
-        <div style="width:100%;max-width:360px;">
-          <div style="font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--muted);margin-bottom:24px;">CONFIGURACIÓN ${current + 1} / ${steps.length}</div>
-          <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:32px;line-height:1.2;">${s.label}</div>
-          <input id="ob-input" class="result-input" type="${s.type}" placeholder="${s.placeholder}"
-            min="${s.min}" max="${s.max}" step="${s.step}" inputmode="decimal"
-            style="font-size:28px;font-weight:700;text-align:center;padding:16px;width:100%;margin-bottom:8px;"
-            value="${answers[s.key] || ''}">
-          <div style="text-align:center;font-size:14px;color:var(--muted);margin-bottom:28px;">${s.unit}</div>
-          <button class="btn btn-primary btn-full" id="ob-next" style="padding:14px;">${isLast ? 'Empezar →' : 'Siguiente →'}</button>
-        </div>
-      `;
-      const inp = overlay.querySelector('#ob-input');
-      inp?.focus();
-      overlay.querySelector('#ob-next')?.addEventListener('click', () => {
-        if (!inp?.value?.trim()) { inp?.focus(); return; }
-        answers[s.key] = inp.value.trim();
-        advance();
-      });
-      inp?.addEventListener('keydown', e => { if (e.key === 'Enter') overlay.querySelector('#ob-next')?.click(); });
-    }
-  }
-
-  function advance() {
-    if (current < steps.length - 1) { current++; renderStep(); }
-    else { saveOnboarding(answers); overlay.remove(); }
-  }
-
-  function saveOnboarding(a) {
-    const pesoActual = parseFloat(a.peso_actual) || 80;
-    const pesoMeta   = parseFloat(a.peso_meta)   || 72;
-    const profile = {
-      nombre: 'ZIV MENDELSON',
-      edad: parseInt(a.edad) || 25,
-      dias_semana: parseInt(a.dias_semana) || 4,
-      objetivo: a.objetivo || 'Bajar grasa',
-      inbody_current: { peso_kg: pesoActual, grasa_pct: null, smm_kg: null, tmb_kcal: null },
-      inbody_history: [],
-      objetivos: {
-        peso_meta_kg: pesoMeta,
-        kcal_meta: Math.round(pesoActual * 24),
-        proteina_meta_g: Math.round(pesoActual * 2.2),
-      },
-    };
-    localStorage.setItem('zivplan_profile', JSON.stringify(profile));
-  }
-
-  document.body.appendChild(overlay);
-  renderStep();
+  renderOnboarding();
 }
 
 // ─── Install Prompt ───────────────────────────────────────────────────────────
