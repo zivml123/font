@@ -186,14 +186,14 @@ async function renderHoy() {
     }
   }
 
-  // ── Phase + week number ──
+  // ── Phase + week number — use real calendar week, not plan-capped ──
   const curWeek = getWeekFromDate(now);
-  const phase = curWeek > 0 ? getPhase(Math.min(curWeek, numWeeks)) : 1;
-  const displayWeek = curWeek > 0 ? Math.min(curWeek, numWeeks) : 0;
+  const phase = curWeek > 0 ? getPhase(curWeek) : 1;
+  const displayWeek = curWeek > 0 ? curWeek : 0;
 
   // ── Weekly recap dots (4 training days this week) ──
   let weekDotsHTML = '', weekDoneCount = 0, treadmillMin = 0;
-  if (curWeek > 0 && curWeek <= numWeeks) {
+  if (curWeek > 0) {
     const dotParts = [];
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
       const statuses = SUBS.map(s => prog[workoutKey(curWeek, d, s)]);
