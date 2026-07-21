@@ -10,6 +10,7 @@ import {
 } from '../storage.js';
 import { toastSaved, toastFailed, toastError } from '../components/toast.js';
 import { confirmModal, openModal, closeModal } from '../components/modal.js';
+import { openExerciseModal } from '../components/exerciseModal.js';
 
 const DAYS_ES = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -240,7 +241,7 @@ function renderBlock(w, d, sub) {
     const exercises = getExercises(w, d);
     const exerciseItems = exercises.map(ex =>
       `<li class="exercise-item">
-        <span class="exercise-name">${ex.name}</span>
+        <button class="exercise-name ex-info-btn" data-ex="${ex.name.replace(/"/g, '&quot;')}">${ex.name}</button>
         <span class="exercise-sets">${ex.sets} × ${ex.reps}</span>
       </li>`
     ).join('');
@@ -273,14 +274,22 @@ function renderBlock(w, d, sub) {
       </div>`;
   }
 
-  // abs
+  // abs — parse "Name 3×N · Name 3×N · …" into clickable exercise names
+  const absRaw = getAbsText(w, d);
+  const absHTML = absRaw.split('·').map(part => {
+    const m = part.trim().match(/^(.*?)\s+(\d.*)$/);
+    if (!m) return `<span class="abs-part">${part.trim()}</span>`;
+    const exName = m[1].trim();
+    const setsReps = m[2].trim();
+    return `<span class="abs-part"><button class="ex-info-btn abs-ex-btn" data-ex="${exName.replace(/"/g, '&quot;')}">${exName}</button> ${setsReps}</span>`;
+  }).join(' <span class="abs-dot">·</span> ');
   return `
     <div class="block" data-w="${w}" data-d="${d}" data-sub="abs">
       <div class="block-header">
         <span class="block-icon">🔥</span>
         <span class="block-title">Abs</span>
       </div>
-      <p class="abs-text">${getAbsText(w, d)}</p>
+      <p class="abs-text">${absHTML}</p>
       <div class="block-buttons">
         <button class="btn-block-action ${doneClass}" data-action="done">✓ Hecho</button>
         <button class="btn-block-action ${failClass}" data-action="fail">✕ Fallé</button>
@@ -310,6 +319,14 @@ function bindWorkoutEvents(el) {
     header.addEventListener('click', () => {
       const card = header.closest('.day-card');
       card.classList.toggle('expanded');
+    });
+  });
+
+  // Exercise info buttons
+  el.querySelectorAll('.ex-info-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openExerciseModal(btn.dataset.ex);
     });
   });
 
