@@ -391,6 +391,40 @@ export async function migrateLocalToCloud() {
   return { migrated, errors };
 }
 
+// ─── Daily Abs Tracker (localStorage only) ───────────────────────────────────
+export function getDailyAbsStatus(ds) {
+  try {
+    const map = JSON.parse(localStorage.getItem('zivplan_daily_abs') || '{}');
+    return !!map[ds];
+  } catch { return false; }
+}
+
+export function toggleDailyAbs(ds) {
+  try {
+    const map = JSON.parse(localStorage.getItem('zivplan_daily_abs') || '{}');
+    if (map[ds]) delete map[ds];
+    else map[ds] = true;
+    localStorage.setItem('zivplan_daily_abs', JSON.stringify(map));
+    return !!map[ds];
+  } catch { return false; }
+}
+
+export function getAbsStreak() {
+  try {
+    const map = JSON.parse(localStorage.getItem('zivplan_daily_abs') || '{}');
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (map[ds]) streak++;
+      else break;
+    }
+    return streak;
+  } catch { return 0; }
+}
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 export function dateStr(d) {
   const y = d.getFullYear();

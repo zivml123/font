@@ -1,7 +1,8 @@
 import { state, set } from '../state.js';
 import {
-  WEIGHTS, ABS, CARDIO, DAY_NAMES, DAY_FOCUS, DAY_OFFSETS,
-  getDateFor, getWeekDateRange, workoutKey, DAYS_PER_WEEK, SUBS
+  DAY_NAMES, DAY_FOCUS, DAY_OFFSETS,
+  getDateFor, getWeekDateRange, workoutKey, DAYS_PER_WEEK, SUBS,
+  getExercises, getCardioText, getAbsText, getPhase, MONTH1_WEEKS,
 } from '../workoutData.js';
 import {
   getWorkoutProgress, setWorkoutStatus, resetWorkoutProgress, getNumWeeks, setNumWeeks,
@@ -69,13 +70,15 @@ function renderTodayCard(numWeeks) {
   for (let w = 1; w <= numWeeks; w++) {
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
       if (dateStr(getDateFor(w, d)) === today) {
-        const exercises = WEIGHTS[d];
+        const exercises = getExercises(w, d);
+        const phase = getPhase(w);
         const allDone = SUBS.every(s => prog[workoutKey(w, d, s)] === 'done');
         const doneCount = SUBS.filter(s => prog[workoutKey(w, d, s)] === 'done').length;
+        const phaseLbl = phase === 2 ? ' · MES 2' : '';
 
         return `
           <div class="today-card" id="today-card">
-            <div class="today-card-eyebrow">HOY · SEMANA ${w}</div>
+            <div class="today-card-eyebrow">HOY · SEMANA ${w}${phaseLbl}</div>
             <div class="today-card-title">${DAY_NAMES[d]}</div>
             <div class="today-card-focus">${DAY_FOCUS[d]}</div>
             <div class="today-card-exercises">
@@ -127,8 +130,10 @@ function updateWorkoutView(el) {
   const numWeeks = state.numWeeks;
 
   let weeksHTML = '';
+  let month2HeaderAdded = false;
   for (let w = 1; w <= numWeeks; w++) {
     const { start, end } = getWeekDateRange(w);
+    const phase = getPhase(w);
     let weekDone = 0;
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
       for (const sub of SUBS) {
@@ -161,6 +166,15 @@ function updateWorkoutView(el) {
             ${renderBlock(w, d, 'cam')}
             ${renderBlock(w, d, 'abs')}
           </div>
+        </div>`;
+    }
+
+    if (phase === 2 && !month2HeaderAdded) {
+      month2HeaderAdded = true;
+      weeksHTML += `
+        <div class="phase-banner">
+          <div class="phase-banner-title">MES 2 — FASE 2</div>
+          <div class="phase-banner-sub">Nuevos ejercicios · Caminadora 40 min · Abs diarios</div>
         </div>`;
     }
 
@@ -203,7 +217,10 @@ function updateWorkoutView(el) {
 
     <div class="add-week-section">
       <p class="add-week-info">Plan actual: <strong style="color:var(--text)">${numWeeks} semana${numWeeks !== 1 ? 's' : ''}</strong> · ${numWeeks * DAYS_PER_WEEK * SUBS.length} sub-sesiones totales</p>
-      <button class="btn btn-secondary btn-full" id="btn-add-week">+ Agregar semana ${numWeeks + 1}</button>
+      ${numWeeks === MONTH1_WEEKS
+        ? `<button class="btn btn-primary btn-full" id="btn-start-month2">Comenzar Mes 2 →</button>`
+        : `<button class="btn btn-secondary btn-full" id="btn-add-week">+ Agregar semana ${numWeeks + 1}</button>`
+      }
     </div>
 
     <div class="reset-section">
@@ -220,7 +237,7 @@ function renderBlock(w, d, sub) {
   const failClass = status === 'fail' ? 'fail' : '';
 
   if (sub === 'pesas') {
-    const exercises = WEIGHTS[d];
+    const exercises = getExercises(w, d);
     const exerciseItems = exercises.map(ex =>
       `<li class="exercise-item">
         <span class="exercise-name">${ex.name}</span>
@@ -248,7 +265,7 @@ function renderBlock(w, d, sub) {
           <span class="block-icon">🏃</span>
           <span class="block-title">Caminadora</span>
         </div>
-        <p class="cardio-text">${CARDIO}</p>
+        <p class="cardio-text">${getCardioText(w)}</p>
         <div class="block-buttons">
           <button class="btn-block-action ${doneClass}" data-action="done">✓ Hecho</button>
           <button class="btn-block-action ${failClass}" data-action="fail">✕ Fallé</button>
@@ -263,7 +280,7 @@ function renderBlock(w, d, sub) {
         <span class="block-icon">🔥</span>
         <span class="block-title">Abs</span>
       </div>
-      <p class="abs-text">${ABS[d]}</p>
+      <p class="abs-text">${getAbsText(w, d)}</p>
       <div class="block-buttons">
         <button class="btn-block-action ${doneClass}" data-action="done">✓ Hecho</button>
         <button class="btn-block-action ${failClass}" data-action="fail">✕ Fallé</button>
@@ -332,6 +349,19 @@ function bindWorkoutEvents(el) {
       }
     });
   });
+
+  // Comenzar Mes 2
+  const startMonth2Btn = el.querySelector('#btn-start-month2');
+  if (startMonth2Btn) {
+    startMonth2Btn.addEventListener('click', async () => {
+      await setNumWeeks(8);
+      set('numWeeks', 8);
+      updateWorkoutView(el);
+      setTimeout(() => {
+        el.querySelector('.phase-banner')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    });
+  }
 
   // Add week
   const addWeekBtn = el.querySelector('#btn-add-week');

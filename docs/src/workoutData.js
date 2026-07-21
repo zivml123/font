@@ -60,6 +60,90 @@ export const ABS = [
 
 export const CARDIO = '30 min caminadora — inclinación 8-12%, ritmo constante (zona 2, puedes hablar pero te cuesta)';
 
+// ─── Month 2 (Weeks 5-8) ──────────────────────────────────────────────────────
+export const MONTH1_WEEKS = 4;
+
+export const WEIGHTS_M2 = [
+  // Day 0 — Empuje (variación)
+  [
+    { name: 'Press inclinado con mancuernas', sets: '4', reps: '10' },
+    { name: 'Aperturas en máquina o cables', sets: '3', reps: '12-15' },
+    { name: 'Arnold press', sets: '4', reps: '10' },
+    { name: 'Elevaciones laterales en cable', sets: '3', reps: '15' },
+    { name: 'Extensión tríceps en cuerda', sets: '4', reps: '15' },
+  ],
+  // Day 1 — Tirón (variación)
+  [
+    { name: 'Jalón agarre neutro', sets: '4', reps: '10' },
+    { name: 'Remo Hammer Strength o máquina', sets: '4', reps: '10' },
+    { name: 'Pull-over con mancuerna', sets: '3', reps: '12' },
+    { name: 'Curl predicador', sets: '3', reps: '10-12' },
+    { name: 'Curl en polea baja', sets: '3', reps: '15' },
+  ],
+  // Day 2 — Pierna (variación)
+  [
+    { name: 'Prensa de pierna', sets: '4', reps: '12' },
+    { name: 'Sentadilla búlgara', sets: '3', reps: '10 c/pierna' },
+    { name: 'Extensión de cuádriceps', sets: '3', reps: '15' },
+    { name: 'Curl isquiotibial sentado', sets: '3', reps: '12' },
+    { name: 'Abducción de cadera', sets: '3', reps: '20' },
+  ],
+  // Day 3 — Full Body (variación)
+  [
+    { name: 'Hip thrust con barra', sets: '4', reps: '12' },
+    { name: 'Sentadilla sumo con mancuerna', sets: '3', reps: '12' },
+    { name: 'Peso muerto rumano con mancuernas', sets: '3', reps: '12' },
+    { name: 'Patada de glúteo en cable', sets: '3', reps: '15 c/lado' },
+    { name: 'Plancha con remo de mancuerna', sets: '3', reps: '10 c/lado' },
+  ],
+];
+
+export const ABS_M2 = [
+  'Dead bug 3×10 c/lado · Ab wheel 3×8 · Plancha 3×45 seg',
+  'V-up 3×15 · Russian twist con peso 3×20 · Plancha lateral 3×10 c/lado',
+  'Mountain climbers lentos 3×20 · Elevación de piernas 3×12 · Hollow hold 3×20 seg',
+  'Bicicleta 3×25 · Crunch inverso con peso 3×15 · Plancha con toque hombro 3×12 c/lado',
+];
+
+export const CARDIO_M2 = '40 min caminadora — inclinación 10-12%, ritmo 5-6 km/h (zona 2, foco en quema de grasa)';
+
+// 7-day abs rotation for Phase 2 — index = day of week (0=Dom … 6=Sáb)
+export const DAILY_ABS_M2 = [
+  'Plancha 3×45 seg · Mountain climbers 3×20 · Dead bug 3×10 c/lado',
+  'Crunch 3×20 · Elevación de piernas 3×15 · Plancha lateral 3×30 seg c/lado',
+  'Russian twist 3×20 · V-up 3×12 · Plancha 3×45 seg',
+  'Bicicleta abdominal 3×25 · Hollow hold 3×20 seg · Crunch inverso 3×15',
+  'Dead bug 3×10 c/lado · Mountain climbers lentos 3×20 · Plancha 3×45 seg',
+  'Ab wheel 3×8 · Plancha lateral dinámica 3×10 c/lado · V-up 3×12',
+  'Crunch 3×20 · Plancha 3×45 seg · Elevación de piernas 3×12',
+];
+
+export function getPhase(week) {
+  return week <= MONTH1_WEEKS ? 1 : 2;
+}
+
+export function getExercises(week, dayIndex) {
+  return getPhase(week) === 1 ? WEIGHTS[dayIndex] : WEIGHTS_M2[dayIndex];
+}
+
+export function getCardioText(week) {
+  return getPhase(week) === 1 ? CARDIO : CARDIO_M2;
+}
+
+export function getAbsText(week, dayIndex) {
+  return getPhase(week) === 1 ? ABS[dayIndex] : ABS_M2[dayIndex];
+}
+
+export function getDailyAbsRoutine() {
+  return DAILY_ABS_M2[new Date().getDay()];
+}
+
+export function getWeekFromDate(date) {
+  const daysSince = Math.floor((date - START_MONDAY) / 86400000);
+  if (daysSince < 0) return 0;
+  return Math.floor(daysSince / 7) + 1;
+}
+
 export function getDateFor(week, dayIndex) {
   const d = new Date(START_MONDAY);
   d.setDate(START_MONDAY.getDate() + (week - 1) * 7 + DAY_OFFSETS[dayIndex]);

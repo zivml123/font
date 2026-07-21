@@ -379,6 +379,140 @@
   margin-top: 2px;
 }
 
+/* ─── Phase Banner (between Month 1 and Month 2 weeks) ──── */
+.phase-banner {
+  margin: 8px 16px 4px;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  text-align: center;
+}
+.phase-banner-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.phase-banner-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ─── Hoy: Phase Badge ───────────────────────────────────── */
+.hoy-phase-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ─── Hoy: Weekly Recap Dots ─────────────────────────────── */
+.hoy-week-recap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.hoy-week-recap-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.hoy-week-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hoy-week-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: transparent;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.hoy-week-dot.done { background: var(--done); border-color: var(--done); }
+.hoy-week-dot.fail { background: var(--fail); border-color: var(--fail); }
+.hoy-week-dot.missed { background: var(--panel2); border-color: var(--line); opacity: 0.5; }
+.hoy-week-recap-sub {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* ─── Hoy: Smart Recommendation Card ────────────────────── */
+.hoy-rec-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.hoy-rec-icon {
+  font-size: 14px;
+  color: var(--accent);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.hoy-rec-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* ─── Hoy: Daily Abs Button ──────────────────────────────── */
+.abs-daily-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 8px;
+  padding: 13px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.abs-daily-btn:active { opacity: 0.7; }
+.abs-daily-btn.done {
+  background: var(--panel2);
+  border-color: var(--done);
+  color: var(--done);
+}
+.hoy-abs-routine {
+  margin: 0 16px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+  padding: 0 4px;
+}
+
 /* ─── 5-tab nav ──────────────────────────────────────────── */
 .five-tabs .tab-btn {
   font-size: 9px;

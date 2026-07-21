@@ -6,8 +6,8 @@ import { renderProfile } from './views/profile.js';
 import { renderAuth, showAuth, hideAuth } from './views/auth.js';
 import { applyStoredTheme } from './views/settings.js';
 import { renderOnboarding } from './views/onboarding.js';
-import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS } from './workoutData.js';
-import { getNumWeeks, getSettings } from './storage.js';
+import { getDateFor, workoutKey, DAYS_PER_WEEK, SUBS, START_MONDAY, getPhase, getWeekFromDate, DAILY_ABS_M2 } from './workoutData.js';
+import { getNumWeeks, getSettings, getDailyAbsStatus, toggleDailyAbs, getAbsStreak } from './storage.js';
 
 const TAB_VIEW_MAP = {
   hoy:      'hoy',
@@ -162,10 +162,15 @@ async function renderHoy() {
 
   const numWeeks = await getNumWeeks();
   const prog = JSON.parse(localStorage.getItem('zivplan_workout_progress') || '{}');
-  let wrkStatus = 'Descanso', wrkClass = '';
+
+  // ── Workout status for today ──
+  let wrkStatus = 'Descanso', wrkClass = '', todayIsWorkoutDay = false;
+  let todayWeek = 0, todayDay = -1;
   outer: for (let w = 1; w <= numWeeks; w++) {
     for (let d = 0; d < DAYS_PER_WEEK; d++) {
       if (dateStr(getDateFor(w, d)) === today) {
+        todayIsWorkoutDay = true;
+        todayWeek = w; todayDay = d;
         let done = 0, fail = 0;
         for (const sub of SUBS) {
           const st = prog[workoutKey(w, d, sub)];
@@ -181,13 +186,62 @@ async function renderHoy() {
     }
   }
 
+  // ── Phase + week number ──
+  const curWeek = getWeekFromDate(now);
+  const phase = curWeek > 0 ? getPhase(Math.min(curWeek, numWeeks)) : 1;
+  const displayWeek = curWeek > 0 ? Math.min(curWeek, numWeeks) : 0;
+
+  // ── Weekly recap dots (4 training days this week) ──
+  let weekDotsHTML = '', weekDoneCount = 0, treadmillMin = 0;
+  if (curWeek > 0 && curWeek <= numWeeks) {
+    const dotParts = [];
+    for (let d = 0; d < DAYS_PER_WEEK; d++) {
+      const statuses = SUBS.map(s => prog[workoutKey(curWeek, d, s)]);
+      const allDone = statuses.every(s => s === 'done');
+      const hasFail = statuses.some(s => s === 'fail');
+      const camDone = prog[workoutKey(curWeek, d, 'cam')] === 'done';
+      if (allDone) weekDoneCount++;
+      if (camDone) treadmillMin += (phase >= 2 ? 40 : 30);
+      const dt = getDateFor(curWeek, d);
+      const isPast = dt < now && dateStr(dt) !== today;
+      const dotCls = allDone ? 'done' : hasFail ? 'fail' : isPast ? 'missed' : '';
+      dotParts.push(`<span class="hoy-week-dot ${dotCls}"></span>`);
+    }
+    weekDotsHTML = `
+      <div class="hoy-week-recap">
+        <div class="hoy-week-recap-label">SEMANA ${curWeek}</div>
+        <div class="hoy-week-dots">${dotParts.join('')}</div>
+        <div class="hoy-week-recap-sub">${weekDoneCount}/4 entrenos${treadmillMin > 0 ? ` · ${treadmillMin} min treadmill` : ''}</div>
+      </div>`;
+  }
+
+  // ── Daily abs ──
+  const todayAbsDone = getDailyAbsStatus(today);
+  const absStreak = getAbsStreak();
+  const absRoutine = phase >= 2 ? DAILY_ABS_M2[now.getDay()] : '';
+
+  // ── Smart recommendation ──
+  let recText = '';
+  if (todayIsWorkoutDay && wrkClass === '') {
+    recText = 'Hoy es día de entrenamiento. Empieza con las pesas y termina con la caminadora.';
+  } else if (todayIsWorkoutDay && wrkClass === 'done' && !todayAbsDone && phase >= 2) {
+    recText = 'Excelente entreno. Faltan los abs diarios — solo 5 min para mantener la racha.';
+  } else if (todayIsWorkoutDay && wrkClass === 'done' && todayAbsDone) {
+    recText = 'Día perfecto. Entreno + abs completados. Descansa bien esta noche.';
+  } else if (!todayIsWorkoutDay && !todayAbsDone && phase >= 2) {
+    recText = 'Día de descanso. Haz los abs diarios para no romper la racha.';
+  } else if (!todayIsWorkoutDay && todayAbsDone) {
+    recText = 'Descanso activo completado. Abs hechos — vas perfecto.';
+  } else if (weekDoneCount === 0 && curWeek > 0) {
+    recText = 'Aún no has entrenado esta semana. ¡Empieza hoy!';
+  }
+
+  // ── Calorie ring ──
   const kcalPct    = Math.min(1, kcal / kcalGoal);
   const kcalRemain = Math.max(0, kcalGoal - kcal);
   const ringOffset = HOY_CIRC * (1 - kcalPct);
-  const protPct    = Math.min(100, Math.round((prot / protGoal) * 100));
 
   const avatarSrc = localStorage.getItem('zivplan_avatar') || 'assets/brand.webp';
-  const nombre    = (profile?.nombre || 'Ziv').split(' ')[0];
   const dateLabel = `${DAYS_ES[now.getDay()]}, ${now.getDate()} ${MONTHS_ES[now.getMonth()]}`;
 
   el.innerHTML = `
@@ -204,6 +258,7 @@ async function renderHoy() {
 
       <div class="hoy-date-section">
         <div class="hoy-big-title">HOY</div>
+        ${displayWeek > 0 ? `<div class="hoy-phase-badge">MES ${phase} · SEM ${displayWeek}</div>` : ''}
       </div>
 
       <div class="hoy-ring-section">
@@ -234,12 +289,31 @@ async function renderHoy() {
           <span class="hoy-stat-lbl">Entrenamiento</span>
           <span class="hoy-stat-val ${wrkClass}">${wrkStatus}</span>
         </div>
+        ${phase >= 2 ? `
+        <div class="hoy-stat-row">
+          <span class="hoy-stat-lbl">Abs hoy</span>
+          <span class="hoy-stat-val ${todayAbsDone ? 'done' : ''}">${todayAbsDone ? '✓ Hecho' : 'Pendiente'}${absStreak > 1 ? ` · ${absStreak}d racha` : ''}</span>
+        </div>` : ''}
       </div>
+
+      ${weekDotsHTML}
+
+      ${recText ? `
+      <div class="hoy-rec-card">
+        <span class="hoy-rec-icon">→</span>
+        <span class="hoy-rec-text">${recText}</span>
+      </div>` : ''}
 
       <div class="hoy-actions">
         <button class="btn btn-primary btn-full" id="hoy-btn-food">+ Registrar comida</button>
         <button class="btn btn-secondary btn-full" id="hoy-btn-workout">Ver entrenamiento</button>
       </div>
+
+      ${phase >= 2 ? `
+      <button class="abs-daily-btn ${todayAbsDone ? 'done' : ''}" id="hoy-btn-abs">
+        ${todayAbsDone ? '✓ Abs completados hoy' : '+ Marcar abs diarios'}
+      </button>
+      ${absRoutine ? `<div class="hoy-abs-routine">${absRoutine}</div>` : ''}` : ''}
     </div>
   `;
 
@@ -253,6 +327,10 @@ async function renderHoy() {
   document.getElementById('hoy-avatar-btn')?.addEventListener('click', () => switchTab('perfil'));
   document.getElementById('hoy-btn-food')?.addEventListener('click', () => switchTab('comidas'));
   document.getElementById('hoy-btn-workout')?.addEventListener('click', () => switchTab('entreno'));
+  document.getElementById('hoy-btn-abs')?.addEventListener('click', () => {
+    toggleDailyAbs(today);
+    renderHoy();
+  });
 }
 
 export function refreshDashAvatar() {
