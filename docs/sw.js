@@ -1,5 +1,5 @@
 // Service Worker for GitHub Pages static version
-const CACHE = 'tracklife-v12';
+const CACHE = 'tracklife-v13';
 const STATIC = [
   './',
   './index.html',

@@ -8,12 +8,12 @@ export const SUBS = ['pesas', 'cam', 'abs'];
 export const SUBS_PER_DAY = 3;
 export const DAYS_PER_WEEK = 4;
 
-export const DAY_NAMES = ['Empuje', 'Tirón', 'Pierna', 'Full Body'];
+export const DAY_NAMES = ['Empuje', 'Tirón', 'Kettlebell A', 'Kettlebell B'];
 export const DAY_FOCUS = [
   'PECHO / HOMBRO / TRÍCEPS',
   'ESPALDA / BÍCEPS',
-  'PIERNA COMPLETA',
-  'GLÚTEO / CORE'
+  'CUERPO COMPLETO',
+  'CUERPO COMPLETO'
 ];
 
 export const WEIGHTS = [
@@ -33,21 +33,21 @@ export const WEIGHTS = [
     { name: 'Curl barra o mancuerna', sets: '3', reps: '10-12' },
     { name: 'Curl martillo', sets: '3', reps: '12' },
   ],
-  // Day 2 — Pierna
+  // Day 2 — Kettlebell A (Jueves)
   [
-    { name: 'Sentadilla', sets: '4', reps: '8-10' },
-    { name: 'Peso muerto rumano', sets: '3', reps: '8-10' },
-    { name: 'Prensa de pierna', sets: '3', reps: '10-12' },
-    { name: 'Curl femoral', sets: '3', reps: '12' },
-    { name: 'Elevación de pantorrilla', sets: '4', reps: '15' },
+    { name: 'Swing con kettlebell', sets: '4', reps: '20' },
+    { name: 'Sentadilla goblet', sets: '4', reps: '12' },
+    { name: 'Remo con kettlebell', sets: '3', reps: '12 c/lado' },
+    { name: 'Peso muerto con kettlebell', sets: '3', reps: '15' },
+    { name: 'Press con kettlebell', sets: '3', reps: '10 c/lado' },
   ],
-  // Day 3 — Full Body
+  // Day 3 — Kettlebell B (Viernes)
   [
-    { name: 'Hip thrust', sets: '4', reps: '10-12' },
-    { name: 'Zancadas con mancuernas', sets: '3', reps: '10 c/pierna' },
-    { name: 'Press inclinado mancuernas', sets: '3', reps: '10' },
-    { name: 'Remo en máquina', sets: '3', reps: '10' },
-    { name: 'Face pull', sets: '3', reps: '15' },
+    { name: 'Clean y press', sets: '4', reps: '8 c/lado' },
+    { name: 'Zancadas con kettlebell', sets: '3', reps: '10 c/pierna' },
+    { name: 'High pull', sets: '4', reps: '12' },
+    { name: 'Remo renegado', sets: '3', reps: '8 c/lado' },
+    { name: 'Sentadilla sumo con kettlebell', sets: '3', reps: '15' },
   ],
 ];
 
@@ -80,21 +80,21 @@ export const WEIGHTS_M2 = [
     { name: 'Curl predicador', sets: '3', reps: '10-12' },
     { name: 'Curl en polea baja', sets: '3', reps: '15' },
   ],
-  // Day 2 — Pierna (variación)
+  // Day 2 — Kettlebell A variación (Jueves Mes 2)
   [
-    { name: 'Prensa de pierna', sets: '4', reps: '12' },
-    { name: 'Sentadilla búlgara', sets: '3', reps: '10 c/pierna' },
-    { name: 'Extensión de cuádriceps', sets: '3', reps: '15' },
-    { name: 'Curl isquiotibial sentado', sets: '3', reps: '12' },
-    { name: 'Abducción de cadera', sets: '3', reps: '20' },
+    { name: 'Swing con kettlebell', sets: '5', reps: '20' },
+    { name: 'Sentadilla goblet con pausa', sets: '4', reps: '10' },
+    { name: 'Clean y press', sets: '4', reps: '8 c/lado' },
+    { name: 'Peso muerto a una pierna', sets: '3', reps: '10 c/pierna' },
+    { name: 'High pull', sets: '3', reps: '15' },
   ],
-  // Day 3 — Full Body (variación)
+  // Day 3 — Kettlebell B variación (Viernes Mes 2)
   [
-    { name: 'Hip thrust con barra', sets: '4', reps: '12' },
-    { name: 'Sentadilla sumo con mancuerna', sets: '3', reps: '12' },
-    { name: 'Peso muerto rumano con mancuernas', sets: '3', reps: '12' },
-    { name: 'Patada de glúteo en cable', sets: '3', reps: '15 c/lado' },
-    { name: 'Plancha con remo de mancuerna', sets: '3', reps: '10 c/lado' },
+    { name: 'Snatch con kettlebell', sets: '4', reps: '8 c/lado' },
+    { name: 'Zancadas inversas con kettlebell', sets: '4', reps: '10 c/pierna' },
+    { name: 'Press militar', sets: '3', reps: '10 c/lado' },
+    { name: 'Remo renegado', sets: '4', reps: '8 c/lado' },
+    { name: 'Farmer carry', sets: '3', reps: '30 seg' },
   ],
 ];
 
